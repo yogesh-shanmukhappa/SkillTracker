@@ -1,0 +1,50 @@
+.pagination:first-child {
+  width: 80% !important;
+  float: left !important;
+}
+table {
+    margin-top: 4px;
+    thead {
+        th {
+            font-size: 12px;
+            text-align: center;
+            paddding:3px !important;
+        }
+    }
+    tbody {
+        tr {
+            font-size: 13px;
+            text-align: center;
+        }
+    }
+}
+label {
+  font-size: 12px !important
+}
+
+.main-container {
+    padding: 15px;
+    -ms-overflow-x: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+	margin: 70px 10px 0 0;
+    border: 1px solid #bbb;
+	background-color: #fff;
+    order:2;
+    flex-grow: 1;
+    min-height: 592px;
+}
+.sidebar-section-container {
+	background-color: #e2e2e2;
+    display: flex;
+    app-sidebar {
+        order:1
+    }
+
+}
+@media screen and (max-width: 992px) {
+    .main-container {
+
+    }
+}

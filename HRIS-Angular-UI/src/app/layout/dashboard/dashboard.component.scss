@@ -1,0 +1,182 @@
+$sky-blue : #24AEE4;
+$grey-color : #464a4c;
+.ng-valid[required], .ng-valid.required  {
+    border-left: 5px solid #42A948; /* green */
+}
+.ng-invalid:not(form)  {
+    border-left: 5px solid #a94442; /* red */
+}
+.employeeprofile-section {
+    h6.text-muted-header {
+        color: #00b0e3;
+        font-weight: bold;
+        margin: 5px 10px 15px;
+        font-size: 14px;
+    }
+    h6.text-muted-header.useful-links {
+      margin: 32px 0px 10px 37px;
+    }
+    h6.text-muted-header.grey-color {
+      color:$grey-color;
+      font-weight:400;
+    }
+    div.horizontal-pipe-line {
+        height: 1px;
+        background-color: #bbb;
+        opacity: 0.5;
+    }
+}
+
+.cus-h6 {
+  margin: 20px 0px 5px 10px;
+  text-transform: uppercase;
+  font-size:12px;
+  color:$sky-blue;
+  font-weight: 600;
+}
+
+.tab-info {
+    overflow: visible;
+    padding:15px;
+    .form-group {
+      overflow:hidden;
+      margin: 0 0 0 10px;
+    }
+    .form-group.custom-overflow {
+        overflow: visible;
+    }
+    .user-profile {
+      border:2px solid #ddd;
+    }
+    .align-center {
+      text-align: center;
+      vertical-align: middle;
+    }
+    .btn-skyblue {
+      background: $sky-blue;
+      color:#fff;
+      margin:10px auto;
+    }
+    .align-right {
+      text-align: right;
+    }
+
+    label {
+        font-size: 12px;
+        font-weight: bold;
+        margin: 7px 0;
+    }
+    input.form-control {
+        font-size: 12px;
+        padding: 0rem 0.5rem;
+        height: 30px;
+        margin-bottom: 2px;
+    }
+    input[type="file"] {
+        font-size: 12px;
+        width: 85px;
+    }
+    button#btnSubmit {
+        font-size: 12px;
+        width: 85px;
+    }
+    select.form-control {
+        font-size: 12px;
+        padding: 0rem 0.5rem;
+        height: 30px;
+        margin-bottom: 2px;
+    }
+    input.form-control:disabled{
+        background-color: #fff;
+        border-color: #fff;
+        cursor: default;
+    }
+    select.form-control:disabled {
+        background-color: #fff;
+        border-color: #fff;
+        -webkit-appearance: none;
+        width: auto;
+        padding-right: 0;
+    }
+    select[multiple].form-control:disabled {
+        background-color: #fff;
+        border-color: #fff;
+        overflow: hidden;
+    }
+    textarea.form-control {
+        font-size: 12px;
+    }
+    textarea.form-control:disabled {
+        font-size: 12px;
+        background-color: #fff;
+        border-color: #fff;
+        resize: none;
+    }
+    .tab-h6 {
+        margin:10px;
+        font-size:14px;
+        color:$sky-blue;
+        font-weight: 600;
+    }
+    .asset-group {
+        border-top:5px solid $sky-blue;
+        background: #eeeeee;
+        padding:15px;
+    }
+    .no-margin-left {
+        margin-left:0px !important;
+    }
+    .control-label {
+        font-weight: bold;
+    }
+    span.radio-text {
+        font-size: 12px;
+    }
+    span.side-text {
+        font-size: 12px;
+    }
+    span.post-fix-text {
+        font-size: 12px;
+    }
+
+    .alert {
+        position: absolute;
+        font-size: 12px;
+	    padding: 5px 10px;
+    }
+    .form-group .row > * {
+        position: unset;
+    }
+
+}
+.cus-align {
+  width:auto;
+  float:left
+}
+.size {
+  font-size: 12px;
+  line-height: 30px;
+  margin-left: 5px;
+}
+
+.card-body {
+  padding:20px
+}
+
+.links {
+
+  li {
+    list-style: none;
+    margin-bottom: 5px;
+    a {
+      color:#464a4c;
+      font-size: 12px;
+      font-family: sans-serif;
+    }
+  }
+}
+
+
+.fa-external-link {
+  margin-right:5px
+}

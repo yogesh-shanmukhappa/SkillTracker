@@ -1,0 +1,22 @@
+.tab-content > .active {
+    min-height: 450px;
+}
+table {
+    margin-top: 4px;
+    thead {
+        th {
+            font-size: 12px;
+            text-align: center;
+            paddding:3px !important;
+        }
+    }
+    tbody {
+        tr {
+            font-size: 13px;
+            text-align: center;
+        }
+    }
+}
+label {
+  font-size: 12px !important
+}

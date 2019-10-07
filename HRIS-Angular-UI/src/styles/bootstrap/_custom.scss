@@ -1,0 +1,54 @@
+// Bootstrap overrides
+//
+// Copy variables from `_variables.scss` to this file to override default values
+// without modifying source files.
+
+.tabs-list {
+    .nav-tabs .nav-item {
+        .nav-link {
+            background-color: #ddd;
+            border-radius: 0;
+            font-size: 11px;
+            font-weight: bold;
+            color: #444;
+            border-top: 5px solid #ddd;
+            margin-right: 10px;
+            text-transform: uppercase;
+        }
+        .nav-link.active {
+            background-color: #fff;
+            color: #51ce2a;
+            border-top: 5px solid #51ce2a;
+            font-size: 11px;
+            font-weight: bold;
+        }
+    }
+
+    .nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+        border-color: #ddd;
+    }
+
+    .nav-tabs .nav-link.active:focus, .nav-tabs .nav-link.active:hover {
+        border-color: #51ce2a;
+        border-bottom: 1px solid #fff;
+    }
+
+    .form-group {
+        display: block;
+    }
+
+    .tab-pane {
+        border: 1px solid #ddd;
+        border-top: none;
+    }
+
+}
+
+.tab-content > .active {
+    min-height: 450px;
+}
+
+.thead-inverse th, table thead th {
+    color: #fff;
+    background-color: #50addf !important;
+}
