@@ -7,8 +7,8 @@
 export const environment = {
   production: false,
   apiServerURL: 'http://127.0.0.1:3100',
-  uiApiEncPwd: '#$AffineHRI5@!&*',
-  uiApiDecPwd: '#$AffineH615&%$#',
-  locEncDecPwd: '%^&*AffineHRIS!@#$',
-  uiApiDecSPwd: '#$SAf%fineYS$%H615&%$#'
+  uiApiEncPwd: 'test123',
+  uiApiDecPwd: 'test123',
+  locEncDecPwd: 'test123',
+  uiApiDecSPwd: 'test123'
 };
