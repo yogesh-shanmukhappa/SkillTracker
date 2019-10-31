@@ -8,7 +8,6 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import {ModalModule} from "ng2-modal";
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {
@@ -31,7 +30,6 @@ export function HttpLoaderFactory(http: Http) {
         HttpModule,
         HttpClientModule,
         AppRoutingModule,
-        ModalModule,
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,

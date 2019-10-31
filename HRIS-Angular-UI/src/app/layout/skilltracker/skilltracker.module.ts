@@ -10,7 +10,6 @@ import { SkilltrackerService } from '../../provider/skilltracker/skilltracker.se
 
 import { SkilltrackerRoutingModule } from './skilltracker-routing.module';
 import { SkilltrackerComponent } from './skilltracker.component';
-import {ModalModule} from "ng2-modal";
 import { StatModule } from '../../shared';
 
 @NgModule({
@@ -21,8 +20,7 @@ import { StatModule } from '../../shared';
         NgbModule.forRoot(),
         SkilltrackerRoutingModule,
         StatModule,
-        FormsModule,
-        ModalModule
+        FormsModule
     ],
     declarations: [
         SkilltrackerComponent
