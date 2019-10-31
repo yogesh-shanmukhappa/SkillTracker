@@ -5,30 +5,100 @@
         <div class="tabs-list">
             <ngb-tabset>
                 <ngb-tab>
-                    <ng-template ngbTabTitle> Skill Tracker</ng-template>
+                    <ng-template ngbTabTitle> Skill Tracker</ng-template> 
                     <ng-template ngbTabContent>
-                        <div class="col-md-3 nav-link-column">
+                        <div class="nav-link-column" >
                             <div class="nav-link-actions">
                                 <div class="nav-link-box">
-                                        <form #addSkill = "ngForm" (ngSubmit) = "onClickSubmit(addSkill.value)" >
-                                            Select Skill : <select name="skill" required="" ngModel>
-                                                <option value="" selected>-------Choose Skill---------</option>
-                                                <option value="PhP">PhP</option>
-                                                <option value="Java">Java</option>
-                                                <option value=".Net">.Net</option>
-                                                <option value="Angular">Angular</option>
-                                            </select><br/><br/>
-                                            Skill Type:
-                                            <input type = "radio" name = "skilltype" value="Primary" ngModel>Primary 
-                                            <input type = "radio" name = "skilltype" value="Horizon3" ngModel> Horizon3<br/><br/>
+                                    <div>
+                                        <div>
+                                            <label>Evaluation  Quarter: </label>
+                                            <select (change)="filterForeCasts($event.target.value)">
+                                                <option>Select Evaluation Quarter</option>
+                                                <option *ngFor="let quarter of evaluationQrtr" value={{quarter}}>
+                                                    {{quarter}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div *ngIf="isPrimarySkills" style="margin-top: 10px;">
+                                            <h5>Resoursing Skill Set: </h5>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <th *ngFor="let col of columns">
+                                                    {{col}}
+                                                    </th>
+                                                </tr>
+                                                <tr *ngFor="let skills of skillDetails; let i = index">
+                                                    <td> {{i+1}}
+                                                    </td>
+                                                    <td>
+                                                    {{skills}}
+                                                    </td>
+                                                    <td>
+                                                        <input type="text">
+                                                    </td>
+                                                    <td>
+                                                        <select (change)="filterForeCasts($event.target.value)">
+                                                            <option>Select score</option>
+                                                            <option *ngFor="let logitive of logitivityScore" value={{logitive.id}}>
+                                                                {{logitive.name}}
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select (change)="filterForeCasts($event.target.value)">
+                                                            <option>Select score</option>
+                                                            <option *ngFor="let exp of experienceScore" value={{exp.id}}>
+                                                                {{exp.name}}
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" readonly>
+                                                    </td>
+                                                    <td>
+                                                        <select (change)="filterForeCasts($event.target.value)">
+                                                            <option>Evaluated</option>
+                                                            <option *ngFor="let eva of Evaluated" value={{eva.id}}>
+                                                                {{eva.value}}
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" readonly val="30-10-2019">
+                                                    </td>
+                                                </tr>
+                                                <!-- <tr *ngFor="let char of skillDetails | async">
+                                                    <td *ngFor="let col of columns">
+                                                    {{char[col]}}
+                                                    </td>
+                                                </tr> -->
+                                            </table>
+                                        </div>
 
-                                            <!--<div class="form-check">
-                                              <input type="radio" class="form-check-input" id="materialChecked" name="materialExampleRadios" checked mdbInput>
-                                              <label class="form-check-label" for="materialChecked">Primary</label>
-                                            </div>-->
-                                           <input type = "submit" value = "Add Skill">
-
-                                        </form>
+                                        <div class="row" *ngIf="isPrimarySkills" style="margin-top:10px;">
+                                            <div class="col col-md-6" style="text-align: right;">
+                                                <button type="button" class="btn btn-success">Submit</button>
+                                            </div>
+                                            <div class="col col-md-6">
+                                                <button type="button" class="btn btn-success">Reset</button>
+                                            </div>
+                                        </div>
+                                        <div class="row" *ngIf="isHorizonSkills" style="margin-top:10px;">
+                                            <h5> Horizon Skill Set: </h5>
+                                            <div class="col col-md-12">
+                                                <button type="button" class="btn btn-primary" (click)="openModal('custom-modal-2')">Add Skills</button>
+                                            </div>
+                                        </div>
+                                        <div class="row" *ngIf="isHorizonSkills" style="margin-top:10px;">
+                                            <div class="col col-md-6" style="text-align: right;">
+                                                <button type="button" class="btn btn-success">Submit</button>
+                                            </div>
+                                            <div class="col col-md-6">
+                                                <button type="button" class="btn btn-success">Reset</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -38,5 +108,3 @@
         </div>
     </div>
 </div>
-
-

@@ -6,11 +6,11 @@ import {
     NgbCarouselModule,
     NgbAlertModule
 } from '@ng-bootstrap/ng-bootstrap';
-
+import { SkilltrackerService } from '../../provider/skilltracker/skilltracker.service'
 
 import { SkilltrackerRoutingModule } from './skilltracker-routing.module';
 import { SkilltrackerComponent } from './skilltracker.component';
-
+import {ModalModule} from "ng2-modal";
 import { StatModule } from '../../shared';
 
 @NgModule({
@@ -21,11 +21,13 @@ import { StatModule } from '../../shared';
         NgbModule.forRoot(),
         SkilltrackerRoutingModule,
         StatModule,
-        FormsModule
+        FormsModule,
+        ModalModule
     ],
     declarations: [
         SkilltrackerComponent
     ],
-    schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
+    schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
+    providers: [SkilltrackerService]
 })
 export class SkilltrackerModule { }

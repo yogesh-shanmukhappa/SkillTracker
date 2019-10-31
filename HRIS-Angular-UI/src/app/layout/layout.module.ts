@@ -7,6 +7,7 @@ import { FileSelectDirective } from 'ng2-file-upload';
 import { LayoutRoutingModule } from './layout-routing.module';
 import { LayoutComponent } from './layout.component';
 import { HeaderComponent, SidebarComponent, WindowClickedDirective } from '../shared';
+import {ModalModule} from "ng2-modal";
 
 @NgModule({
     imports: [
@@ -16,7 +17,8 @@ import { HeaderComponent, SidebarComponent, WindowClickedDirective } from '../sh
         LayoutRoutingModule,
         TranslateModule,
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        ModalModule
     ],
     declarations: [
         LayoutComponent,
