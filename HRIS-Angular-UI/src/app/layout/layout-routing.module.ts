@@ -16,6 +16,10 @@ const routes: Routes = [
                 path: 'reports',
                 loadChildren: './reports/reports.module#ReportsModule'
             },
+            {
+                path: 'skilltracker',
+                loadChildren: './skilltracker/skilltracker.module#SkilltrackerModule'
+            },
         ]
     }
 ];

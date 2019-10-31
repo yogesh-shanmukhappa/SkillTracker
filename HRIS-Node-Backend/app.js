@@ -151,10 +151,10 @@ var options = {
 };
 
 let nowDateTime = new Date();
-https.createServer(options, app).listen(3100, function() {
+https.createServer(options, app).listen(3300, function() {
   console.log(`App listening with https on port 3100. Started at ${nowDateTime}`);
 });
 
-https.createServer(options, app).listen(3200, function() {
+https.createServer(options, app).listen(3400, function() {
   console.log(`App listening with https on port 3200. Started at ${nowDateTime}`);
 });
