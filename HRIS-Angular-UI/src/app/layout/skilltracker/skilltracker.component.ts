@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 import { Http, ResponseContentType } from '@angular/http';
 import { Globals } from '../../shared';
-import { FormsModule } from '@angular/forms';
+import {FormGroup, FormControl, Validators}  from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 import { SkilltrackerService } from '../../provider/skilltracker/skilltracker.service'
 
@@ -18,11 +18,20 @@ export class SkilltrackerComponent implements OnInit {
     public evaluationQrtr: string[];
     columns: string[];
     skillDetails: string[];
-    isPrimarySkills: boolean = false;
-    isHorizonSkills:boolean = false;
+    isPrimarySkills: boolean = true;
+    isHorizonSkills:boolean = true;
+    isDataAddedinHorizon:boolean = false;
     logitivityScore:Array<any> = [];
     experienceScore:Array<any> = [];
     Evaluated:Array<any> = [];
+    display='none';
+    logedInForm;
+    horizonSkills = {Acepta: false};
+    horizonSkillDetails:Array<any> = [];
+    submittedData:boolean = false;
+    employeeId:Array<any> = [];
+    managerColumns: string[];
+    EvaluatedData:Array<any> = [];
 
     constructor(
         private http: Http, private globals : Globals, private STService : SkilltrackerService
@@ -36,7 +45,34 @@ export class SkilltrackerComponent implements OnInit {
         this.skillDetails = this.STService.getPrimarySkills();
         this.logitivityScore = this.STService.getLogitivityScore();
         this.experienceScore = this.STService.getExperienceScore();
-        this.Evaluated = [{id:0, value:'NO'},{id:1, value:'YES'}]
+        this.Evaluated = this.STService.getEvaluatedDetails(); 
+        this.employeeId = this.STService.getEmployeeDetails();
+        this.managerColumns = this.STService.getManagerColoumns();
+        this.EvaluatedData = this.STService.getPrimarySkills();
+        this.horizonSkills.Acepta = false;
+    }
+
+    changeHorizonBox(data,_skill){;
+        if(data)
+            this.isDataAddedinHorizon = data;
+        /*for(let i=0;i<this.horizonSkillDetails.length;i++){
+            if(this.horizonSkillDetails[i].skill.indexOf(_skill) > -1){
+                this.horizonSkillDetails.push({
+                    skill:_skill,
+                    isEnable: data
+                });
+            }
+        }*/
+        this.horizonSkillDetails.push({
+            skill:_skill,
+            isEnable: data
+        });
+        console.log(this.horizonSkillDetails);
+    }
+    onClickSubmit(evnt){
+        console.log(evnt);
+        this.submittedData = true;
+        this.closeModalDialog();
     }
 
     filterForeCasts(event){
@@ -50,12 +86,24 @@ export class SkilltrackerComponent implements OnInit {
             this.isHorizonSkills = true;
         }
     }
-    onClickSubmit(event){
-    alert('here');
-    }
 
-    openModal(id){
-        alert("Open modal... development going on")
+    openModalDialog(){
+        this.display='block'; //Set block css
+     }
+    
+     closeModalDialog(){
+      this.display='none'; //set none css after close dialog
+     }
+
+     resetHorizon(){
+        this.horizonSkillDetails = [];
+
+     }
+
+    /*** Approval section: tab2 ***/
+    
+    filterApproval(event){
+        
     }
 
 }

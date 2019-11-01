@@ -33,4 +33,20 @@ export class SkilltrackerService {
     return [{id:1, name:1},{id:2, name:2},{id:3, name:3},{id:4, name:4}];
   }
 
+  getEmployeeDetails(): Array<any> {
+    return [{id:2019001, name:'Saismita'},{id:2019002, name:'Debashri'},{id:2009003, name:'Avinandan'}];
+  }
+
+  getEvaluatedDetails(): Array<any> {
+    return [{id:0, value:'Beginner'},{id:1, value:'Intermediate'},{id:2, value:'Advanced'}];
+  }
+
+  getManagerColoumns(): string[] {
+    return ["Sl No", "Skills", "Matrix Score", "Logitivity Score", "Experience Score", "Skill Score"];
+  }
+
+  geEvaluatedData(): Array<any> {
+    return [{id:2019001, name:'Saismita'},{id:2019002, name:'Debashri'},{id:2009003, name:'Avinandan'}];
+  }
+
 }
