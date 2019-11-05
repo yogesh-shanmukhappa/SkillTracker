@@ -17,7 +17,8 @@ export class SkilltrackerComponent implements OnInit {
     public sliders: Array<any> = [];
     public evaluationQrtr: string[];
     columns: string[];
-    skillDetails: string[];
+    skillDetails: Array<any> = [];
+    secondarySkillDetails : Array<any> = [];
     isPrimarySkills: boolean = true;
     isHorizonSkills:boolean = true;
     isDataAddedinHorizon:boolean = false;
@@ -32,47 +33,92 @@ export class SkilltrackerComponent implements OnInit {
     employeeId:Array<any> = [];
     managerColumns: string[];
     EvaluatedData:Array<any> = [];
+    skillsAddedfromPopup:Array<any> = [];
 
     constructor(
         private http: Http, private globals : Globals, private STService : SkilltrackerService
     ) {
+        STService.getPrimarySkills().subscribe((data : any[])=>{
+            if(data.length > 0){
+                for(let i=0;i<data.length;i++){
+                let dt = data[i].s_name;
+                    dt.replace(' ','_');
+                    data[i].s_model = dt;
+                    if(data[i].s_type.toLowerCase() == 'primary'){
+                        this.skillDetails.push(data[i]);
+                    } else {
+                        this.secondarySkillDetails.push(data[i]);
+                    }
+                }
+            }
+        }, err => {
+            console.log(err);
+        })
 
     }
 
     ngOnInit() {
         this.evaluationQrtr = this.STService.getQuarter();
         this.columns = this.STService.getColumns();
-        this.skillDetails = this.STService.getPrimarySkills();
+        //this.skillDetails = this.STService.getPrimarySkills();
+        //console.log(this.skillDetails);
         this.logitivityScore = this.STService.getLogitivityScore();
         this.experienceScore = this.STService.getExperienceScore();
         this.Evaluated = this.STService.getEvaluatedDetails(); 
         this.employeeId = this.STService.getEmployeeDetails();
         this.managerColumns = this.STService.getManagerColoumns();
-        this.EvaluatedData = this.STService.getPrimarySkills();
+        //this.EvaluatedData = this.STService.getPrimarySkills();
         this.horizonSkills.Acepta = false;
+
+        
+    }
+
+    numberOnly(event): boolean {
+        const charCode = (event.which) ? event.which : event.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+          return false;
+        }
+        return true;
+    
+      }
+
+    filterLogitivityScore(param) {
+
+    }
+
+    onSubmit() {
+
+    }
+
+    onReset() {
+
     }
 
     changeHorizonBox(data,_skill){;
-        if(data)
-            this.isDataAddedinHorizon = data;
-        /*for(let i=0;i<this.horizonSkillDetails.length;i++){
-            if(this.horizonSkillDetails[i].skill.indexOf(_skill) > -1){
-                this.horizonSkillDetails.push({
-                    skill:_skill,
-                    isEnable: data
-                });
-            }
-        }*/
-        this.horizonSkillDetails.push({
-            skill:_skill,
-            isEnable: data
-        });
-        console.log(this.horizonSkillDetails);
+        this.isDataAddedinHorizon = data;
+        let indexNo = this.skillsAddedfromPopup.indexOf(_skill)
+        if(data && indexNo == -1){
+            this.skillsAddedfromPopup.push(_skill);
+        } else if(indexNo >= 0){
+            this.skillsAddedfromPopup.splice(indexNo,1);
+        }
+        console.log(this.skillsAddedfromPopup);
     }
     onClickSubmit(evnt){
-        console.log(evnt);
+        this.horizonSkillDetails = [];
         this.submittedData = true;
+        for(let i=0;i<this.skillsAddedfromPopup.length ;i ++){
+            this.horizonSkillDetails.push({
+                skill:this.skillsAddedfromPopup[i],
+                isEnable: true
+            });
+            console.log(this.horizonSkillDetails);
+        }
         this.closeModalDialog();
+    }
+
+    skillLevel() {
+        
     }
 
     filterForeCasts(event){

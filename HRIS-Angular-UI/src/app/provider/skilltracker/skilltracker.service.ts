@@ -3,11 +3,13 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/delay';
 import { PRIMARY_KEY } from '../../mock-data/mock-data';
+import { HttpClient } from '@angular/common/http'
 
 @Injectable()
 export class SkilltrackerService {
+  service_url="http://127.0.0.1:3000/"
 
-  constructor() { }
+  constructor(public http:HttpClient) { }
 
   getPrimaryKeys(): Observable<any[]>{
     return Observable.of(PRIMARY_KEY).delay(100);
@@ -21,8 +23,9 @@ export class SkilltrackerService {
     return ['Q4-2019','Q3-2019','Q2-2019','Q1-2019','Q4-2018','Q3-2018','Q2-2018','Q1-2018'];
   }
 
-  getPrimarySkills(): string[]{
-    return ['php','angular','python','java','javascript','html'];
+  getPrimarySkills(){
+    //return ['php','angular','python','java','javascript','html'];
+    return this.http.get(this.service_url+'getAllSkillType');
   }
 
   getLogitivityScore(): Array<any> {

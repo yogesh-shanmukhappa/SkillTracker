@@ -32,13 +32,13 @@
                                                     <td> {{i+1}}
                                                     </td>
                                                     <td>
-                                                    {{skills}}
+                                                    {{skills.s_name}}
                                                     </td>
                                                     <td>
-                                                        <input type="text">
+                                                        <input type="text" (keypress)="numberOnly($event)">
                                                     </td>
                                                     <td>
-                                                        <select (change)="filterForeCasts($event.target.value)">
+                                                        <select (change)="filterLogitivityScore($event.target.value)">
                                                             <option>Select score</option>
                                                             <option *ngFor="let logitive of logitivityScore" value={{logitive.id}}>
                                                                 {{logitive.name}}
@@ -73,10 +73,10 @@
 
                                         <div class="row" *ngIf="isPrimarySkills" style="margin-top:10px;">
                                             <div class="col col-md-6" style="text-align: right;">
-                                                <button type="button" class="btn btn-success">Submit</button>
+                                                <button type="button" class="btn btn-success" (click)="onSubmit()">Submit</button>
                                             </div>
                                             <div class="col col-md-6">
-                                                <button type="button" class="btn btn-success">Reset</button>
+                                                <button type="button" class="btn" (click)="onReset()">Reset</button>
                                             </div>
                                         </div>
                                         <div class="row" *ngIf="isHorizonSkills" style="margin-top:10px;">
@@ -99,7 +99,7 @@
                                                     {{second.skill}}
                                                     </td>
                                                     <td>
-                                                        <select (change)="filterForeCasts($event.target.value)">
+                                                        <select (change)="skillLevel($event.target.value)">
                                                             <option>Select</option>
                                                             <option *ngFor="let eva of Evaluated" value={{eva.id}}>
                                                                 {{eva.value}}
@@ -111,10 +111,10 @@
                                         </div>
                                         <div class="row" *ngIf="submittedData && horizonSkillDetails.length > 0" style="margin-top:10px;">
                                             <div class="col col-md-6" style="text-align: right;">
-                                                <button type="button" class="btn btn-success">Submit</button>
+                                                <button type="button" class="btn btn-success" (click)="onSubmit()">Submit</button>
                                             </div>
                                             <div class="col col-md-6">
-                                                <button type="button" class="btn btn-success" (click)="resetHorizon()">Reset</button>
+                                                <button type="button" class="btn" (click)="onReset()">Reset</button>
                                             </div>
                                         </div>
                                     </div>
@@ -262,24 +262,24 @@
         <form #userlogin = "ngForm" (ngSubmit) = "onClickSubmit(userlogin.value)" >
             <table style="width:100%">
                 <tr>
-                    <th>Skills</th>
-                    <th>Select</th>
+                    <th style="width:10%;">Choose</th>
+                     <th>Skills</th>
                 </tr>
-                <tr *ngFor="let skills of skillDetails; let i = index">
-                    <td>
-                    {{skills}}
-                    </td>
+                <tr *ngFor="let skills of secondarySkillDetails; let i = index">
                     <td>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="checkbox" (change)="changeHorizonBox(horizonSkills[skills],skills)" [(ngModel)]="horizonSkills[skills]" [ngModelOptions]="{standalone: true}">
+                                <input type="checkbox" (change)="changeHorizonBox(skills[s_model],skills.s_name)" [(ngModel)]="skills[s_model]" [ngModelOptions]="{standalone: true}">
                             </label>
                         </div>
+                    </td>
+                    <td>
+                    {{skills.s_name}}
                     </td>
                 </tr>
             </table>
             <!-- <button type="button" class="btn btn-info btn-lg" style="margin-top: 10px; text-align: center;">Add</button> -->
-            <input type = "submit" value = "Add">
+            <input type = "submit" class="btn btn-success" value = "Add">
          </form>
       </div>
 
