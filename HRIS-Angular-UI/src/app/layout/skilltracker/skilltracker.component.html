@@ -34,18 +34,25 @@
                                                 <tbody>
                                                     <tr *ngFor="let skills of skillDetails; let i = index">
                                                         <td> {{i+1}} </td>
-                                                        <td> {{skills.s_name}} </td>
-                                                        <td> <input type="text" (keypress)="numberOnly($event)" class="form-control"> </td>
-                                                        <td>
-                                                            <select (change)="filterLogitivityScore($event.target.value)" class="form-control">
+                                                        <td> <span>{{skills.s_name}}</span> </td>
+                                                        <td> 
+                                                            <select (change)="calculateSkillScore(0,$event.target.value,i)" class="form-control">
                                                                 <option>Select score</option>
-                                                                <option *ngFor="let logitive of logitivityScore" value={{logitive.id}}>
-                                                                    {{logitive.name}}
+                                                                <option *ngFor="let matrix of matrixScore" value={{matrix.id}}>
+                                                                    {{matrix.name}}
                                                                 </option>
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <select (change)="filterForeCasts($event.target.value)" class="form-control">
+                                                            <select (change)="calculateSkillScore(1,$event.target.value,i)" class="form-control">
+                                                                <option>Select score</option>
+                                                                <option *ngFor="let longivity of longivityScore" value={{longivity.id}}>
+                                                                    {{longivity.name}}
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select (change)="calculateSkillScore(2,$event.target.value,i)" class="form-control">
                                                                 <option>Select score</option>
                                                                 <option *ngFor="let exp of experienceScore" value={{exp.id}}>
                                                                     {{exp.name}}
@@ -53,13 +60,15 @@
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <h6 class="aa-field-value">0</h6>
+                                                            <!-- <h6 class="aa-field-value"> -->
+                                                                <span>{{ skillResult.toFixed(2) }} </span>
+                                                            <!-- </h6> -->
                                                         </td>
                                                         <td>
-                                                            <h6>No</h6>
+                                                            <h6><span>No</span></h6>
                                                         </td>
                                                         <td>
-                                                            <h6>05-11-2019</h6>
+                                                            <h6><span>05-11-2019</span></h6>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -273,7 +282,7 @@
       <div class="modal-body">
         <form #userlogin = "ngForm" (ngSubmit) = "onClickSubmit(userlogin.value)" >
             <div class="row">
-                <div class="col-12"  *ngFor="let skills of secondarySkillDetails; let i = index">
+                <div class="col-12 col-sm-6"  *ngFor="let skills of secondarySkillDetails; let i = index">
                     <input type="checkbox" (change)="changeHorizonBox(skills[s_model],skills.s_name)" [(ngModel)]="skills[s_model]" [ngModelOptions]="{standalone: true}" class="form-control-inline ">&nbsp;{{skills.s_name}}
                 </div>
             </div>
