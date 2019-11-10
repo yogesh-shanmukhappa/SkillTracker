@@ -83,9 +83,8 @@
                                         <!-- Primary Skill Buttons -->
                                         <div class="row mt-3" *ngIf="isPrimarySkills">
                                             <div class="col col-md-6" style="text-align: right;">
-                                                <button type="button" class="btn btn-success" (click)="onSubmit()">Submit</button>
+                                                <button type="button" class="btn btn-success" (click)="onSubmit(1)">Submit</button>
                                             </div>
-                                            
                                         </div>
                                         <!-- Horizon3 Skill Add -->
                                         <div class="row mt-3" *ngIf="isHorizonSkills">
@@ -102,7 +101,7 @@
                                                 <thead>
                                                     <th>Sl No</th>
                                                     <th>Skills</th>
-                                                    <th>Experience</th>
+                                                    <th>Select</th>
                                                 </thead>
                                                 <tbody>
                                                     <tr *ngFor="let second of horizonSkillDetails; let i = index">
@@ -111,7 +110,7 @@
                                                         {{second.skill}}
                                                         </td>
                                                         <td>
-                                                            <select (change)="skillLevel($event.target.value)" class="form-control">
+                                                            <select (change)="addHorizonSkills($event.target.value, i)" class="form-control">
                                                                 <option>Select</option>
                                                                 <option *ngFor="let eva of Evaluated" value={{eva.id}}>
                                                                     {{eva.value}}
@@ -125,9 +124,8 @@
                                         <!-- Horizon3 Skill Buttons -->
                                         <div class="row mt-3" *ngIf="submittedData && horizonSkillDetails.length > 0">
                                             <div class="col col-md-6" style="text-align: right;">
-                                                <button type="button" class="btn btn-success" (click)="onSubmit()">Submit</button>
+                                                <button type="button" class="btn btn-success" (click)="onSubmit(2)">Submit</button>
                                             </div>
-                                            
                                         </div>
                                 </div>
                             </div>
@@ -278,8 +276,8 @@
       <div class="modal-body">
         <form #userlogin = "ngForm" (ngSubmit) = "onClickSubmit(userlogin.value)" >
             <div class="row">
-                <div class="col-12 col-sm-6"  *ngFor="let skills of secondarySkillDetails; let i = index">
-                    <input type="checkbox" (change)="changeHorizonBox(skills[s_model],skills.s_name)" [(ngModel)]="skills[s_model]" [ngModelOptions]="{standalone: true}" class="form-control-inline ">&nbsp;{{skills.s_name}}
+                <div class="col-12 col-sm-6" *ngFor="let skills of secondarySkillDetails; let i = index">
+                    <input type="checkbox" (change)="changeHorizonBox(skills[s_model],skills.s_name,skills)" [(ngModel)]="skills[s_model]" [ngModelOptions]="{standalone: true}" class="form-control-inline ">&nbsp;{{skills.s_name}}
                 </div>
             </div>
             
