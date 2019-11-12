@@ -53,7 +53,7 @@ export class SkilltrackerService {
   }
 
   getEvaluatedDetails(): Array<any> {
-    return [{id:0, value:'Beginner'},{id:1, value:'Intermediate'},{id:2, value:'Advanced'}];
+    return [{id:1, value:'Beginner'},{id:2, value:'Intermediate'},{id:3, value:'Advanced'}];
   }
 
   getManagerColoumns(): string[] {

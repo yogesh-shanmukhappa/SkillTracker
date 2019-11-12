@@ -13,6 +13,7 @@ import { SkilltrackerService } from '../../provider/skilltracker/skilltracker.se
     animations: [routerTransition()]
 })
 export class SkilltrackerComponent implements OnInit {
+
     public alerts: Array<any> = [];
     public sliders: Array<any> = [];
     public evaluationQrtr: string[];
@@ -127,39 +128,42 @@ export class SkilltrackerComponent implements OnInit {
     onSubmit(skillIndex) {
 		if(skillIndex == 1 || skillIndex == '1'){
 			var jsonData = [];
+            let passDetails:string;
 			for(var i=0;i<this.skillDetails.length;i++){
-				var obj = {
-					"e_id" : 0,
-					"s_id" : this.skillDetails[i].s_id,
-					"s_type": "1",
-					"matrix_score" : this.skillDetails[i].matrixScore,
-					"longivity_score" : this.skillDetails[i].longivityScore,
-					"experience_score" : this.skillDetails[i].experienceScore,
-					"evaluated" : "0",
-					"manager_e_id" : 0,
-					"skill_score" : this.skillDetails[i].skillScore
-				};
-				jsonData.push(obj);
-				let passDetails = JSON.stringify(jsonData);
-
-				this.STService.saveSkillInformation(passDetails).subscribe(data=>{
-					let res:any = data;
-					if(res){  
-					  alert("success")
-					}else{
-					  alert("error")
-					}
-				  });
+                if(+this.skillDetails[i].skillScore > 0){
+                    var obj = {
+    					"e_id" : 0,
+    					"s_id" : this.skillDetails[i].s_id,
+    					"s_type": "Primary",
+    					"matrix_score" : this.skillDetails[i].matrixScore,
+    					"longivity_score" : this.skillDetails[i].longivityScore,
+    					"experience_score" : this.skillDetails[i].experienceScore,
+    					"evaluated" : "0",
+    					"manager_e_id" : 0,
+    					"skill_score" : this.skillDetails[i].skillScore
+    				};
+    				jsonData.push(obj);
+				    passDetails = JSON.stringify(jsonData);
+                }
 			}
+            this.STService.saveSkillInformation(passDetails).subscribe(data=>{
+                let res:any = data;
+                if(res){  
+                  alert("success")
+                }else{
+                  alert("error")
+                }
+            });
 		}
 		if(skillIndex == 2 || skillIndex == '2'){
 			var jsonData = [];
+            let passDetails:string;
 			console.log(this.horizonSkillDetails);
 			for(var i=0;i<this.horizonSkillDetails.length;i++){
 				var obj_s = {
 					"e_id" : 0,
 					"s_id" : this.horizonSkillDetails[i].s_id,
-					"s_type": "2",
+					"s_type": "Horizon3",
 					"matrix_score" : 0,
 					"longivity_score" : 0,
 					"experience_score" : 0,
@@ -168,17 +172,16 @@ export class SkilltrackerComponent implements OnInit {
 					"skill_score" : this.horizonSkillDetails[i].skill_status
 				};
 				jsonData.push(obj_s);
-				let passDetails = JSON.stringify(jsonData);
-
-				this.STService.saveSkillInformation(passDetails).subscribe(data=>{
-					let res:any = data;
-					if(res){  
-					  alert("success")
-					}else{
-					  alert("error")
-					}
-				  });
+				passDetails = JSON.stringify(jsonData);
 			}
+            this.STService.saveSkillInformation(passDetails).subscribe(data=>{
+                let res:any = data;
+                if(res){  
+                  alert("success")
+                }else{
+                  alert("error")
+                }
+            });
 		}
 	}
 
@@ -198,6 +201,8 @@ export class SkilltrackerComponent implements OnInit {
             this.skillsAddedfromPopup.splice(indexNo,1);
         }
     }
+
+
     onClickSubmit(evnt){
         this.horizonSkillDetails = [];
         this.submittedData = true;
@@ -212,7 +217,6 @@ export class SkilltrackerComponent implements OnInit {
             });
         }
         this.closeModalDialog();
-		console.log(this.secondarySkillDetails);
     }
 
     skillLevel() {
