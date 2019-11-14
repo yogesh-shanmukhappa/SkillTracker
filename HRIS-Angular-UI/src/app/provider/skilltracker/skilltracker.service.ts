@@ -8,65 +8,69 @@ import {Http, Response, Headers, RequestOptions} from "@angular/http";
 
 @Injectable()
 export class SkilltrackerService {
-  service_url="http://127.0.0.1:3000/";
-  httpOptions = {
+   service_url="http://127.0.0.1:3000/";
+   httpOptions = {
     headers: new HttpHeaders({
     'Content-Type':  'application/json',
     'Authorization': 'my-auth-token'
     })
-  };
+   };
 
-  constructor(public http:HttpClient) { }
+   constructor(public http:HttpClient) { }
 
-  getPrimaryKeys(): Observable<any[]>{
-    return Observable.of(PRIMARY_KEY).delay(100);
-  }
+   getPrimaryKeys(): Observable<any[]>{
+      return Observable.of(PRIMARY_KEY).delay(100);
+   }
 
-  getColumns(): string[]{
-    return ["Sl No", "Skills", "Matrix Score", "Longivity Score", "Experience Score", "Skill Score", "Evaluated", "Evaluated on"];
-  }
+   getColumns(): string[]{
+      return ["Sl No", "Skills", "Matrix Score", "Longivity Score", "Experience Score", "Skill Score", "Evaluated", "Evaluated on"];
+   }
 
-  getQuarter(): string[]{
-    return ['Q4-2019','Q3-2019','Q2-2019','Q1-2019','Q4-2018','Q3-2018','Q2-2018','Q1-2018'];
-  }
+   getMatrixScoreOption(): Array<any> {
+      return [{'id':0,'name':'Select Score'},{'id':1,'name':'1 - Basic'},{'id':2,'name':'2 - Intermediate1'},{'id':3,'name':'3 - Intermediate2'},
+            {'id':4,'name':'4 - Expert'} ];
+   }
 
-  getPrimarySkills(){
-    //return ['php','angular','python','java','javascript','html'];
-    return this.http.get(this.service_url+'getAllSkillType');
-  }
+   getLongivityScoreOption(): Array<any> {
+      return [{'id':0,'name':'Select score'},{id:1, name:"1 - More Than 18 Months"},{id:2, name:"2 - 8 to 18 Months"},{id:3, name:"3 - 4 to 7 Months"},{id:4, name:"4 - 0 1o 3 Months"}];
+   }
 
-  getMatrixScore(): Array<any> {
-    return [{'id':0,'name':'0 - Not Used'},{'id':1,'name':'1 - Basic'},{'id':2,'name':'2 - Intermediate1'},{'id':3,'name':'3 - Intermediate2'},
-            {'id':4,'name':'4 - Expert'}];
-  }
+   getExperienceScoreOption(): Array<any> {
+      return [{'id':0,'name':'Select score'},{id:1, name:"1 - 0 to 3 Months"},{id:2, name:"2 - 4 to 7 Months"},{id:3, name:"3 - 8 to 15 Months"},{id:4, name:"4 - More Than 18 Months"}];
+   }
 
-  getLongivityScore(): Array<any> {
-    return [{id:1, name:"1 - More Than 18 Months"},{id:2, name:"2 - 8 to 18 Months"},{id:3, name:"3 - 4 to 7 Months"},{id:4, name:"4 - 0 1o 3 Months"}];
-  }
+   getHorizonSkillScoreOption(): Array<any> {
+      return [{id:1, value:'Beginner'},{id:2, value:'Intermediate'},{id:3, value:'Advanced'}];
+   }
 
-  getExperienceScore(): Array<any> {
-    return [{id:1, name:"1 - 0 to 3 Months"},{id:2, name:"2 - 4 to 7 Months"},{id:3, name:"3 - 8 to 15 Months"},{id:4, name:"4 - More Than 18 Months"}];
-  }
+   getEvaluationStatusOption(): Array<any> {
+      return [{id:0, name:'Pending'},{id:1, name:'Approved'}];
+   }
 
-  getEmployeeDetails(): Array<any> {
-    return [{id:2019001, name:'Saismita'},{id:2019002, name:'Debashri'},{id:2009003, name:'Avinandan'}];
-  }
+   //For Getting Current Qtr Skills
+   getLatestSkillDetails(data){
+      return this.http.post(this.service_url+'getDefaultSkillDetails',data,this.httpOptions);
+   }
 
-  getEvaluatedDetails(): Array<any> {
-    return [{id:1, value:'Beginner'},{id:2, value:'Intermediate'},{id:3, value:'Advanced'}];
-  }
+   //For History Qtr Skills
+   getHistorySkillDetails(data){
+      return this.http.post(this.service_url+'getSkillDetailsHistory',data,this.httpOptions);
+   }
 
-  getManagerColoumns(): string[] {
-    return ["Sl No", "Skills", "Matrix Score", "Logitivity Score", "Experience Score", "Skill Score"];
-  }
-
-  geEvaluatedData(): Array<any> {
-    return [{id:2019001, name:'Saismita'},{id:2019002, name:'Debashri'},{id:2009003, name:'Avinandan'}];
-  }
-
-  saveSkillInformation(data){
+   //For Saving Skills into DB
+   saveSkillInformation(data){
       return this.http.post(this.service_url+"addSkillTracker", data, this.httpOptions);
-  }
+   }
+
+   //GET Employee List
+   getEmployeeList(){
+      return this.http.get(this.service_url+'getEmployeeList');
+   }
+
+   //For Saving Skills into DB
+   saveApprovalData(data){
+      return this.http.post(this.service_url+"approveSkillTracker", data, this.httpOptions);
+   }
   
 
 }
