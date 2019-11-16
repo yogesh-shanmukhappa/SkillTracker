@@ -22,10 +22,6 @@ export class SkilltrackerService {
       return Observable.of(PRIMARY_KEY).delay(100);
    }
 
-   getColumns(): string[]{
-      return ["Sl No", "Skills", "Matrix Score", "Longivity Score", "Experience Score", "Skill Score", "Evaluated", "Evaluated on"];
-   }
-
    getMatrixScoreOption(): Array<any> {
       return [{'id':0,'name':'Select Score'},{'id':1,'name':'1 - Basic'},{'id':2,'name':'2 - Intermediate1'},{'id':3,'name':'3 - Intermediate2'},
             {'id':4,'name':'4 - Expert'} ];

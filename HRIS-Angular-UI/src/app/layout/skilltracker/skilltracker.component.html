@@ -147,22 +147,6 @@
                                                             </tr>
                                                         </ng-container>
                                                     </tbody>
-                                                    <!--<tbody>
-                                                        <tr *ngFor="let second of horizonSkillDetails; let i = index">
-                                                            <td>{{i+1}}</td>
-                                                            <td>
-                                                            {{second.s_name}}
-                                                            </td>
-                                                            <td>
-                                                                <select (change)="addHorizonSkills($event.target.value, i)" class="form-control">
-                                                                    <option>Select</option>
-                                                                    <option *ngFor="let eva of horizonSkillScoreOption" value={{eva.id}}>
-                                                                        {{eva.value}}
-                                                                    </option>
-                                                                </select>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>-->
                                                 </table>
                                             </div>
                                             <!-- Horizon3 Skill Buttons -->
@@ -339,22 +323,6 @@
                                                                 </tr>
                                                             </ng-container>
                                                         </tbody>
-                                                        <!--<tbody>
-                                                            <tr *ngFor="let second of EvaluatedData; let i = index">
-                                                                <td>{{i+1}}</td>
-                                                                <td>
-                                                                {{second}}
-                                                                </td>
-                                                                <td>
-                                                                    <select (change)="filterForeCasts($event.target.value)" class="form-control">
-                                                                        <option>Select</option>
-                                                                        <option *ngFor="let eva of Evaluated" value={{eva.id}}>
-                                                                            {{eva.value}}
-                                                                        </option>
-                                                                    </select>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>-->
                                                     </table>
                                                 </div>
                                             
@@ -374,9 +342,6 @@
 </div>
 
 <!-- After clicking the button open the modal dialog using open/close event binding methods -->
-<!-- <button type="button" class="btn btn-info btn-lg" (click)="closeModalDialog()">Open Login Modal Dialog!</button>
-<div class="backdrop" [ngStyle]="{'display':display}"></div> -->
-
 <!-- modal -->
 <div class="modal" tabindex="-1" role="dialog"  [ngStyle]="{'display':display}">
   <!-- modal-dialog -->

@@ -22,7 +22,6 @@ export class SkilltrackerComponent implements OnInit {
     employeeID = 'EMP0003';
     role = 1;
 
-    columns: string[];
     skillDetails: Array<any> = [];
     secondarySkillDetails : Array<any> = [];
     horizonSkillDetails:Array<any> = [];
@@ -56,15 +55,12 @@ export class SkilltrackerComponent implements OnInit {
         this.evaluationQrtr = this.getEvaluationQuarter();
 
         //For Priamry Skills 
-        this.columns = this.STService.getColumns();
         this.matrixScoreOption = this.STService.getMatrixScoreOption();
         this.longivityScoreOption = this.STService.getLongivityScoreOption();
         this.experienceScoreOption = this.STService.getExperienceScoreOption();
 
         //FOr Horizon3 Skills
         this.horizonSkillScoreOption = this.STService.getHorizonSkillScoreOption();  
-        console.log(this.employeeID);
-        console.log(this.skillDetails); 
     }
 
     //For Populating Evaluation Quarter List
