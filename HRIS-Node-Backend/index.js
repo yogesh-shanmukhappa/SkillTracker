@@ -69,13 +69,18 @@ app.get('/getSkillTypes', function (req, res) {
 */
 app.post('/addSkillTracker', function (req, res) {
   var params  = req.body;
-  console.log(params);
+  //console.log(params);
   var len = params.length;
   for (var i=0; i< len; i++) {
-    connection.query('INSERT INTO skill_tracker SET ?', params[i], function (error, results, fields) {
+    connection.query('SELECT * FROM skill_tracker WHERE s_id="'+params[i]['s_id']+'" AND e_id="'+params[i]['e_id']+'"', params[i], function (error, results, fields) {
       if (error) throw error;
         res.end(JSON.stringify(results));
     });
+    console.log(JSON.stringify(results));
+    /*connection.query('INSERT INTO skill_tracker SET ?', params[i], function (error, results, fields) {
+      if (error) throw error;
+        res.end(JSON.stringify(results));
+    });*/
   }
 });
 
