@@ -19,7 +19,7 @@ export class SkilltrackerComponent implements OnInit {
     public sliders: Array<any> = [];
     public evaluationQrtr: string[];
 
-    employeeID = 'EMP0001';
+    employeeID = 'EMP0003';
     role = 1;
 
     columns: string[];
@@ -46,21 +46,7 @@ export class SkilltrackerComponent implements OnInit {
     employeeList:Array<any> = [];
     approvalSkillDetails: Array<any> = [];
     approvalHorizon3SkillDetails : Array<any> = [];
-   
-    //isPrimarySkills: boolean = true;
-    isHorizonSkills:boolean = true;
-    //isDataAddedinHorizon:boolean = false;
-    
-    //logedInForm;
-    //horizonSkills = {Acepta: false};
-   
-    //managerColumns: string[];
-    //EvaluatedData:Array<any> = [];
-    //skillsAddedfromPopup:Array<any> = [];
-    //skillMaster:Array<any> = [0,0,0];
-    //skillResult:Array<any> = [];
-    //skillModels:Array<any> = [];
-    //scoreAvailable: boolean = false;
+ 
 	
     constructor(private http: Http, private globals : Globals, private STService : SkilltrackerService) {
         this.loadCurrentSkills();
@@ -76,7 +62,9 @@ export class SkilltrackerComponent implements OnInit {
         this.experienceScoreOption = this.STService.getExperienceScoreOption();
 
         //FOr Horizon3 Skills
-        this.horizonSkillScoreOption = this.STService.getHorizonSkillScoreOption();    
+        this.horizonSkillScoreOption = this.STService.getHorizonSkillScoreOption();  
+        console.log(this.employeeID);
+        console.log(this.skillDetails); 
     }
 
     //For Populating Evaluation Quarter List
@@ -102,6 +90,7 @@ export class SkilltrackerComponent implements OnInit {
     loadCurrentSkills(){
         this.skillDetails = [];
         this.secondarySkillDetails = [];
+        this.horizonSkillDetails = [];
 
         let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary"}
         let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3"}
@@ -127,7 +116,7 @@ export class SkilltrackerComponent implements OnInit {
                     dt.replace(' ','_');
                     data[i].s_model = dt;
                     this.secondarySkillDetails.push(data[i]);
-                    if(data[i].e_id){
+                    if(data[i].id){
                         this.horizonSkillDetails.push(data[i]);
                         this.secondarySkillDetails[i].checked = true;
                     }
@@ -142,6 +131,7 @@ export class SkilltrackerComponent implements OnInit {
     loadHistorySkills(selectedQtr){
         this.skillDetails = [];
         this.secondarySkillDetails = [];
+        this.horizonSkillDetails = [];
 
         let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary","evaluation_qtr":selectedQtr}
         let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3","evaluation_qtr":selectedQtr}
@@ -157,7 +147,6 @@ export class SkilltrackerComponent implements OnInit {
         }, err => {
             console.log(err);
         })
-        console.log(this.skillDetails);
         //HORIZON3 SKILL DETAILS
         param = JSON.stringify(_jsonDtHorizon3);
         this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
@@ -187,14 +176,6 @@ export class SkilltrackerComponent implements OnInit {
             this.isCurrentQtr = true;
             this.loadCurrentSkills();
         }
-        /*if(event.toLowerCase() == "select evaluation quarter"){
-            this.isPrimarySkills = false;
-            this.isHorizonSkills = false;
-        }
-        else{
-            this.isPrimarySkills = true;
-            this.isHorizonSkills = true;
-        }*/
     }
 
     //For Calculating Skill Score of Primary Skills on Matrix, Logivity & Experience score change
@@ -227,6 +208,8 @@ export class SkilltrackerComponent implements OnInit {
 			}
             this.STService.saveSkillInformation(passDetails).subscribe(data=>{
                 let res:any = data;
+                console.log(data);
+                console.log(res);
                 if(res){  
                   alert("success")
                 }else{
@@ -237,9 +220,9 @@ export class SkilltrackerComponent implements OnInit {
 		if(skillIndex == 2 || skillIndex == '2'){
 			var jsonData = [];
             let passDetails:string;
-			console.log(this.horizonSkillDetails);
 			for(var i=0;i<this.horizonSkillDetails.length;i++){
 				var obj_s = {
+                    "evaluation_qtr":this.currentQtr,
 					"e_id" : this.employeeID,
 					"s_id" : this.horizonSkillDetails[i].s_id,
 					"s_type": "Horizon3",
@@ -248,7 +231,7 @@ export class SkilltrackerComponent implements OnInit {
 					"experience_score" : 0,
 					"evaluated" : "0",
 					"manager_e_id" : 0,
-					"skill_score" : this.horizonSkillDetails[i].skill_status
+					"skill_score" : this.horizonSkillDetails[i].skill_score
 				};
 				jsonData.push(obj_s);
 				passDetails = JSON.stringify(jsonData);
@@ -344,10 +327,8 @@ export class SkilltrackerComponent implements OnInit {
             if(data.length > 0){
                 for(let i=0;i<data.length;i++){
                     this.approvalSkillDetails.push(data[i]);
-                    //this.approvalSkillDetailsHistory.push(data[i]);
                 }
             }
-            //this.approvalSkillDetailsHistory = cloneDeep(this.approvalSkillDetails);
         }, err => {
             console.log(err);
         })
@@ -357,7 +338,6 @@ export class SkilltrackerComponent implements OnInit {
             if(data.length > 0){
                 for(let i=0;i<data.length;i++){
                     this.approvalHorizon3SkillDetails.push(data[i]);
-                    
                 }
             }
         }, err => {
@@ -394,7 +374,6 @@ export class SkilltrackerComponent implements OnInit {
                 jsonData.push(obj);
                 passDetails = JSON.stringify(jsonData);
             }
-            console.log(passDetails);
             this.STService.saveApprovalData(passDetails).subscribe(data=>{
                 let res:any = data;
                 if(res){  
@@ -407,23 +386,26 @@ export class SkilltrackerComponent implements OnInit {
         if(skillIndex == 2 || skillIndex == '2'){
             var jsonData = [];
             let passDetails:string;
-            console.log(this.horizonSkillDetails);
-            for(var i=0;i<this.horizonSkillDetails.length;i++){
-                var obj_s = {
-                    "e_id" : this.employeeID,
-                    "s_id" : this.horizonSkillDetails[i].s_id,
-                    "s_type": "Horizon3",
-                    "matrix_score" : 0,
-                    "longivity_score" : 0,
-                    "experience_score" : 0,
-                    "evaluated" : "0",
-                    "manager_e_id" : 0,
-                    "skill_score" : this.horizonSkillDetails[i].skill_status
-                };
-                jsonData.push(obj_s);
-                passDetails = JSON.stringify(jsonData);
+            for(var i=0;i<this.approvalHorizon3SkillDetails.length;i++){
+                if(+this.approvalHorizon3SkillDetails[i].evaluated != 0){
+                    var obj_s = {
+                        "id":this.approvalHorizon3SkillDetails[i].id,
+                        "evaluation_qtr":this.approvalQtr,
+                        "e_id" : this.approvalEmployeeId,
+                        "s_id" : this.approvalHorizon3SkillDetails[i].s_id,
+                        "s_type": "Horizon3",
+                        "matrix_score" : 0,
+                        "longivity_score" : 0,
+                        "experience_score" : 0,
+                        "skill_score" : this.approvalHorizon3SkillDetails[i].skill_score,
+                        "evaluated" : this.approvalHorizon3SkillDetails[i].evaluated,
+                        "manager_e_id" : this.employeeID
+                    };
+                    jsonData.push(obj_s);
+                    passDetails = JSON.stringify(jsonData);
+                }
             }
-            this.STService.saveSkillInformation(passDetails).subscribe(data=>{
+            this.STService.saveApprovalData(passDetails).subscribe(data=>{
                 let res:any = data;
                 if(res){  
                   alert("success")
@@ -432,6 +414,7 @@ export class SkilltrackerComponent implements OnInit {
                 }
             });
         }
+        this.getApprovalData();
     }
 
 }

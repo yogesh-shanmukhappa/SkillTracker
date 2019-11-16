@@ -98,10 +98,10 @@
 
 
                                         <!-- Horizon3 Skill Add -->
-                                        <div class="row mt-3" *ngIf="isHorizonSkills">
+                                        <div class="row mt-3">
                                             <div class="col-12">
                                                 <h5 class="aa-form-group-header"> Horizon Skill Set
-                                                    <button type="button" class="btn btn-primary btn-sm" (click)="openModalDialog()">Add Skills</button>
+                                                    <button type="button" class="btn btn-primary btn-sm" (click)="openModalDialog()" *ngIf="isCurrentQtr">Add Skills</button>
                                                 </h5>
                                                 <div class="backdrop" [ngStyle]="{'display':display}"></div>
                                             </div>
@@ -114,8 +114,40 @@
                                                         <th>Sl No</th>
                                                         <th>Skills</th>
                                                         <th>Skill Score</th>
+                                                        <th>Evaluated</th>
+                                                        <th>Last Evaluated On</th>
                                                     </thead>
                                                     <tbody>
+                                                        <!-- THESE ROWS WILL BE CREATED FOR CURRENT QUARTER -->
+                                                        <ng-container *ngIf="isCurrentQtr">
+                                                            <tr *ngFor="let skills of horizonSkillDetails; let i = index">
+                                                                <td> <span>{{i+1}}</span> </td>
+                                                                <td> <span>{{skills.s_name}}</span> </td>
+                                                                <td> 
+                                                                    <select class="form-control" [(ngModel)]="horizonSkillDetails[i].skill_score">
+                                                                        <option>Select score</option>
+                                                                        <option *ngFor="let score of horizonSkillScoreOption" value={{score.id}} [selected]="skills.skill_score == score.id">
+                                                                            {{score.name}}
+                                                                        </option>
+                                                                    </select>
+                                                                </td>
+                                                                <td> <span>{{skills.evaluated?'Yes':'No'}}</span> </td>
+                                                                <td> <span>{{skills.evaluated_on}}</span> </td>
+                                                            </tr>
+                                                        </ng-container>
+
+                                                        <!-- THESE ROWS WILL BE CREATED FOR HISTORY QUARTER -->
+                                                        <ng-container *ngIf="!isCurrentQtr">
+                                                            <tr *ngFor="let skills of horizonSkillDetails; let i = index">
+                                                                <td> <span>{{i+1}}</span> </td>
+                                                                <td> <span>{{skills.s_name}}</span> </td>
+                                                                <td> <span>{{skills.skill_score | number: '1.2-2' }}</span> </td>
+                                                                <td> <span>{{skills.evaluated?'Yes':'No'}}</span> </td>
+                                                                <td> <span>{{skills.evaluated_on}}</span> </td>
+                                                            </tr>
+                                                        </ng-container>
+                                                    </tbody>
+                                                    <!--<tbody>
                                                         <tr *ngFor="let second of horizonSkillDetails; let i = index">
                                                             <td>{{i+1}}</td>
                                                             <td>
@@ -130,11 +162,11 @@
                                                                 </select>
                                                             </td>
                                                         </tr>
-                                                    </tbody>
+                                                    </tbody>-->
                                                 </table>
                                             </div>
                                             <!-- Horizon3 Skill Buttons -->
-                                            <div class="col-12 mt-3 text-center" *ngIf="submittedData && horizonSkillDetails.length > 0">
+                                            <div class="col-12 mt-3 text-center" *ngIf="horizonSkillDetails.length > 0 && isCurrentQtr">
                                                 <button type="button" class="btn btn-success" (click)="onSubmit(2)">Submit</button>
                                             </div>
                                         </div>
@@ -174,10 +206,10 @@
                                                     <button type="button" class="btn btn-primary" (click)="getApprovalData()">Show</button>
                                                 </div>
                                             </div>
+                                            <!-- Primary Skill Table -->
                                             <div class="row">
-                                                <!-- Primary Skill Table -->
                                                 <div class="col-12 mt-3">
-                                                   <h5 class="aa-form-group-header">Resoursing Skill Set</h5>
+                                                    <h5 class="aa-form-group-header">Resoursing Skill Set</h5>
                                                     <table style="width:100%">
                                                         <thead>
                                                             <th>SL No</th>
@@ -258,35 +290,76 @@
                                             </div>
 
                                             <!-- Horizon3 Skill Table -->
-                                            <div class="row mt-3" *ngIf="isHorizonSkills">
-                                                <h5 class="aa-form-group-header"> Horizon Skill Set </h5>
-                                                <table style="width:100%">
-                                                    <thead>
-                                                        <th>Sl No</th>
-                                                        <th>Skills</th>
-                                                        <th>Select</th>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr *ngFor="let second of EvaluatedData; let i = index">
-                                                            <td>{{i+1}}</td>
-                                                            <td>
-                                                            {{second}}
-                                                            </td>
-                                                            <td>
-                                                                <select (change)="filterForeCasts($event.target.value)" class="form-control">
-                                                                    <option>Select</option>
-                                                                    <option *ngFor="let eva of Evaluated" value={{eva.id}}>
-                                                                        {{eva.value}}
-                                                                    </option>
-                                                                </select>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
                                             <div class="row mt-3">
-                                                <div class="col col-md-12" style="text-align: center;">
-                                                    <button type="button" class="btn btn-success">Approve</button>
+                                                <div class="col-12 mt-3">
+                                                    <h5 class="aa-form-group-header"> Horizon Skill Set </h5>
+                                                    <table style="width:100%">
+                                                        <thead>
+                                                            <th>SL No</th>
+                                                            <th>Skills</th>
+                                                            <th>Skill Score</th>
+                                                            <th>Evaluation</th>
+                                                            <th>Evaluated By</th>
+                                                            <th>Last Evaluated On</th>
+                                                        </thead>
+                                                        <tbody>
+                                                            <ng-container *ngIf="isApprovalCurrentQtr">
+                                                                <tr *ngFor="let skills of approvalHorizon3SkillDetails; let i = index">
+                                                                    <td> <span>{{i+1}}</span> </td>
+                                                                    <td> <span>{{skills.s_name}}</span> </td>
+                                                                    <td> 
+                                                                        <select class="form-control" [(ngModel)]="approvalHorizon3SkillDetails[i].skill_score">
+                                                                            <option *ngFor="let score of horizonSkillScoreOption" value={{score.id}} [selected]="skills.skill_score == score.id">
+                                                                                {{score.name}}
+                                                                            </option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td>
+                                                                        <select class="form-control" [(ngModel)]="approvalHorizon3SkillDetails[i].evaluated">
+                                                                            <!-- <option>Select score</option> -->
+                                                                            <option *ngFor="let eval of evaluationStatusOption" value={{eval.id}} [selected]="skills.evaluated == eval.id">
+                                                                                {{eval.name}}
+                                                                            </option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td> <span>{{skills.manager_name }}</span> </td>
+                                                                    <td> <span>{{skills.evaluated_on }}</span> </td>
+                                                                </tr>
+                                                            </ng-container>
+
+                                                            <!-- THESE ROWS WILL BE CREATED FOR HISTORY QUARTER -->
+                                                            <ng-container *ngIf="!isApprovalCurrentQtr">
+                                                                <tr *ngFor="let skills of approvalHorizon3SkillDetails; let i = index">
+                                                                    <td> <span>{{i+1}}</span> </td>
+                                                                    <td> <span>{{skills.s_name}}</span> </td>
+                                                                    <td> <span>{{skills.skill_score | number: '1.2-2' }}</span> </td>
+                                                                    <td> <span>{{skills.evaluated?'Yes':'No'}}</span> </td>
+                                                                    <td> <span>{{skills.manager_name }}</span> </td>
+                                                                    <td> <span>{{skills.evaluated_on}}</span> </td>
+                                                                </tr>
+                                                            </ng-container>
+                                                        </tbody>
+                                                        <!--<tbody>
+                                                            <tr *ngFor="let second of EvaluatedData; let i = index">
+                                                                <td>{{i+1}}</td>
+                                                                <td>
+                                                                {{second}}
+                                                                </td>
+                                                                <td>
+                                                                    <select (change)="filterForeCasts($event.target.value)" class="form-control">
+                                                                        <option>Select</option>
+                                                                        <option *ngFor="let eva of Evaluated" value={{eva.id}}>
+                                                                            {{eva.value}}
+                                                                        </option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>-->
+                                                    </table>
+                                                </div>
+                                            
+                                                <div class="col-12 mt-3 text-center">
+                                                    <button type="button" class="btn btn-success" (click)="saveApprovalData(2)">Submit</button>
                                                 </div>
                                             </div>
                                         

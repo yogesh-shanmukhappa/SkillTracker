@@ -40,7 +40,7 @@ export class SkilltrackerService {
    }
 
    getHorizonSkillScoreOption(): Array<any> {
-      return [{id:1, value:'Beginner'},{id:2, value:'Intermediate'},{id:3, value:'Advanced'}];
+      return [{id:1, name:'Beginner'},{id:2, name:'Intermediate'},{id:3, name:'Advanced'}];
    }
 
    getEvaluationStatusOption(): Array<any> {
