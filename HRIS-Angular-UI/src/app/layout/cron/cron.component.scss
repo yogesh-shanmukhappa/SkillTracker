@@ -17,35 +17,45 @@ table {
         }
     }
 }
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 5px;
+  }
+  th {
+    text-align: left;
+  }
 .reports-section{
-	h6.text-muted-header {
-		color: #00b0e3;
-		font-weight: bold;
-		margin: 5px 10px 15px;
-		font-size: 14px;
-	}
-	div.horizontal-pipe-line {
-		height: 1px;
-		background-color: #bbb;
-		opacity: 0.5;
-	}
-	.tabs-list {
-		margin: 20px 10px 0;
-	}
-	div.tabs-details {
-		border: 1px solid #ddd;
-		min-height: 100px;
-		margin: -1px 10px 10px;
-	}
+    h6.text-muted-header {
+        color: #00b0e3;
+        font-weight: bold;
+        margin: 5px 10px 15px;
+        font-size: 14px;
+    }
+    div.horizontal-pipe-line {
+        height: 1px;
+        background-color: #bbb;
+        opacity: 0.5;
+    }
+    .tabs-list {
+        margin: 20px 10px 0;
+    }
+    div.tabs-details {
+        border: 1px solid #ddd;
+        min-height: 100px;
+        margin: -1px 10px 10px;
+    }
     .user-profile {
         border:1px solid #aaaaaa;
         margin:20px;
     }
     .form-group{
         margin-bottom: 0px;
-		.col-form-label-sm {
-			font-size: 12px;
-		}
+        .col-form-label-sm {
+            font-size: 12px;
+        }
     }
     .tab-h6 {
         margin:20px 0px;
@@ -56,42 +66,71 @@ table {
     .bold {
         font-weight: bold;
     }
-	.nav-link-column {
-	    padding: 20px;
-	}
-	h6.text-muted-sub-header {
-	    font-size: 12px;
-	    font-weight: bolder;
-	}
-	a.nav-link-action {
-	    font-size: 12px;
-	}
-	.nav-link-actions {
-	    margin-top: 5px;
-		.nav-link-box {
-		    padding: 2px 0;
-		}
-	}
-	.nav-link-box ul {
-	    padding: 0px 10px;
-	    list-style-type: none;
-	 	li {
-		    margin-bottom: 10px;
-		}
-	}
+    .nav-link-column {
+        padding: 20px;
+    }
+    h6.text-muted-sub-header {
+        font-size: 12px;
+        font-weight: bolder;
+    }
+    a.nav-link-action {
+        font-size: 12px;
+    }
+    .nav-link-actions {
+        margin-top: 5px;
+        .nav-link-box {
+            padding: 2px 0;
+        }
+    }
+    .nav-link-box ul {
+        padding: 0px 10px;
+        list-style-type: none;
+        li {
+            margin-bottom: 10px;
+        }
+    }
 }
 .panel-default {
   padding:15px;
-	background:#92c18442;
-	margin:5px 0px;
-	.panel-heading {
-		padding:5px;
-	}
-	.panel-title {
-		padding: 0px;
-		margin: 0px;
-		font-size: 16px;
-		font-weight: 600;
-		color: #417502;
-	}
+    background:#92c18442;
+    margin:5px 0px;
+    .panel-heading {
+        padding:5px;
+    }
+    .panel-title {
+        padding: 0px;
+        margin: 0px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #417502;
+    }
+}
+.ng-valid[required], .ng-valid.required  {
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    border-left: 10px solid rgb(218, 200, 43); /* yellow */
+}
+
+.ng-invalid:not(form)  {
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    border-left: 10px solid #e94646; /* red */
+}
+
+.backdrop {
+    background-color:rgba(0,0,0,0.6);
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100vh;
+    z-index:1000;
+}
+
+.modal {
+    width: 50%;
+    display: block;
+    margin-left: 25%;
 }

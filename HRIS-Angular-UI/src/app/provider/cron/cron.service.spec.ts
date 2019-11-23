@@ -1,15 +1,15 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { SkilltrackerService } from './skilltracker.service';
+import { CronService } from './cron.service';
 
-describe('SkilltrackerService', () => {
+describe('CronService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SkilltrackerService]
+      providers: [CronService]
     });
   });
 
-  it('should be created', inject([SkilltrackerService], (service: SkilltrackerService) => {
+  it('should be created', inject([CronService], (service: CronService) => {
     expect(service).toBeTruthy();
   }));
 });

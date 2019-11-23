@@ -318,9 +318,23 @@ app.post('/getReport', function (req, res) {
 	}
 
 
-	console.log(sql);
+	//console.log(sql);
    	connection.query(sql, function (error, results, fields) {
     	if (error) throw error;
     	res.end(JSON.stringify(results));
   	});
+});
+
+
+/*
+* Get Cron Jobs List
+* @param NA
+* @return Cron Jobs
+*/
+app.get('/getCronJobsList', function (req, res) {
+	var sql = "SELECT id,cron_name,cron_description,DATE_FORMAT(last_run_date,'%d-%m-%Y') as last_run_date, DATE_FORMAT(next_run_date,'%d-%m-%Y') asnext_run_date from cron_jobs";
+   connection.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    res.end(JSON.stringify(results));
+  });
 });
