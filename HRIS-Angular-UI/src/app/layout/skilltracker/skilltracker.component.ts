@@ -19,8 +19,8 @@ export class SkilltrackerComponent implements OnInit {
     public sliders: Array<any> = [];
     public evaluationQrtr: string[];
 
-    employeeID = 'EMP0003';
-    role = 1;
+    employeeID = 'EMP0001';
+    role = 0;
 
     skillDetails: Array<any> = [];
     secondarySkillDetails : Array<any> = [];
@@ -45,22 +45,44 @@ export class SkilltrackerComponent implements OnInit {
     employeeList:Array<any> = [];
     approvalSkillDetails: Array<any> = [];
     approvalHorizon3SkillDetails : Array<any> = [];
- 
+
+    //Below are the varibles used for reporting
+    filterOption = 'Primary';
+    reportOption = 'Primary';
+    reportQtr:string;
+    reportDesignation=0;
+    reportSkill=0;
+    reportDeployment = -1;
+    reportEmployeeId = 0;
+    reportEvaluated = -1;
+    reportMatrixScore = 0;
+    reportProject = 0;
+    reportPeopleManager = 0;
+    reportLongivityScore = 0;
+    reportExperienceScore = 0;
+    reportSkillScore = 0;
+    designationList:Array<any> = [];
+    skillList:Array<any> = [];
+    reportEmployeeList:Array<any> = [];
+    reportColumns:Array<any> = [];
+    reportTable:Array<any> = [];
 	
     constructor(private http: Http, private globals : Globals, private STService : SkilltrackerService) {
         this.loadCurrentSkills();
+        this.getApprovalEmployeeList();
     }
 
     ngOnInit() {
         this.evaluationQrtr = this.getEvaluationQuarter();
+        
 
         //For Priamry Skills 
-        this.matrixScoreOption = this.STService.getMatrixScoreOption();
-        this.longivityScoreOption = this.STService.getLongivityScoreOption();
-        this.experienceScoreOption = this.STService.getExperienceScoreOption();
+        this.matrixScoreOption = [{'id':0,'name':'Select Score'},{'id':1,'name':'1 - Basic'},{'id':2,'name':'2 - Intermediate1'},{'id':3,'name':'3 - Intermediate2'},{'id':4,'name':'4 - Expert'} ];
+        this.longivityScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - More Than 18 Months"},{id:2, name:"2 - 8 to 18 Months"},{id:3, name:"3 - 4 to 7 Months"},{id:4, name:"4 - 0 1o 3 Months"}];
+        this.experienceScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - 0 to 3 Months"},{id:2, name:"2 - 4 to 7 Months"},{id:3, name:"3 - 8 to 15 Months"},{id:4, name:"4 - More Than 18 Months"}];
 
         //FOr Horizon3 Skills
-        this.horizonSkillScoreOption = this.STService.getHorizonSkillScoreOption();  
+        this.horizonSkillScoreOption = [{id:1, name:'Beginner'},{id:2, name:'Intermediate'},{id:3, name:'Advanced'}];  
     }
 
     //For Populating Evaluation Quarter List
@@ -176,10 +198,11 @@ export class SkilltrackerComponent implements OnInit {
 
     //For Calculating Skill Score of Primary Skills on Matrix, Logivity & Experience score change
     calculateSkillScore(_inx) {
-        var sumnum = +this.skillDetails[_inx].matrix_score + +this.skillDetails[_inx].longivity_score + +this.skillDetails[_inx].experience_score;
-        this.skillDetails[_inx].skill_score = sumnum/3;
+        var sumnum = (+this.skillDetails[_inx].matrix_score*0.5) + (+this.skillDetails[_inx].longivity_score*0.2) + (+this.skillDetails[_inx].experience_score*0.3);
+        this.skillDetails[_inx].skill_score = sumnum;
     }    
 
+    //For Inserting Primary and Horizon3 skills in the table
     onSubmit(skillIndex) {
 		if(skillIndex == 1 || skillIndex == '1'){
 			var jsonData = [];
@@ -243,8 +266,7 @@ export class SkilltrackerComponent implements OnInit {
 		}
 	}
 
-
-
+    //For Updating Horizon3 table based on the Modal Selection
     changeHorizonBox(model,inx){
         let indexNo = -1
 		for(var i=0;i<this.horizonSkillDetails.length;i++){
@@ -260,27 +282,18 @@ export class SkilltrackerComponent implements OnInit {
         }
     }
 
-
-    onHorizon3Select(evnt){
-        this.closeModalDialog();
-    }
-
+    //For Opening Horizon3 Skills List Modal
     openModalDialog(){
         this.display='block'; //Set block css
     }
     
+    //For Closing Horizon3 Skills List Modal
     closeModalDialog(){
       this.display='none'; //set none css after close dialog
     }
 	 
-	addHorizonSkills(data, _index) {
-		this.horizonSkillDetails[_index].skill_status = data;
-	}
-
-    /*** Approval section: tab2 ***/
+	/*** Approval section: tab2 ***/
     prepareApprovalTab(){
-        this.employeeList = [];
-        this.getEmployeeList();
         this.approvalQtr = this.currentQtr;
         if(this.approvalSkillDetails.length >0){
             this.approvalEmployeeId = this.approvalSkillDetails[0].e_id;   
@@ -288,12 +301,17 @@ export class SkilltrackerComponent implements OnInit {
         else{
             this.approvalEmployeeId = "0";
         }
-        this.evaluationStatusOption = this.STService.getEvaluationStatusOption();
+        this.evaluationStatusOption = [{id:0, name:'Pending'},{id:1, name:'Approved'}];
     }
     
-    getEmployeeList(){
-        this.STService.getEmployeeList().subscribe((data : any[])=>{
+    //For Checking to Show or Hide Approval Tab and To Populate Employee Drop Down List
+    getApprovalEmployeeList(){
+        this.employeeList = [];
+        let emp = {"e_id":this.employeeID};
+        let param = JSON.stringify(emp);
+        this.STService.getApprovalEmployeeList(param).subscribe((data : any[])=>{
             if(data.length > 0){
+                this.role = 1;
                 for(let i=0;i<data.length;i++){
                     this.employeeList.push(data[i]);
                 }
@@ -343,11 +361,11 @@ export class SkilltrackerComponent implements OnInit {
 
     //For Calculating Approval Skill Score of Primary Skills on Matrix, Logivity & Experience score change
     calculateApprovalSkillScore(_inx) {
-        var sumnum = +this.approvalSkillDetails[_inx].matrix_score + +this.approvalSkillDetails[_inx].longivity_score + +this.approvalSkillDetails[_inx].experience_score;
-        this.approvalSkillDetails[_inx].skill_score = sumnum/3;
+        var sumnum = (+this.approvalSkillDetails[_inx].matrix_score*0.5) + (+this.approvalSkillDetails[_inx].longivity_score*0.2) + (+this.approvalSkillDetails[_inx].experience_score*0.3);
+        this.approvalSkillDetails[_inx].skill_score = sumnum;
     }
 
-
+    //For Updating Approval Records in the table
     saveApprovalData(skillIndex) {
         if(skillIndex == 1 || skillIndex == '1'){
             var jsonData = [];
@@ -411,6 +429,179 @@ export class SkilltrackerComponent implements OnInit {
             });
         }
         this.getApprovalData();
+    }
+
+    /*** Report section: tab3 ***/
+    prepareReportTab(){
+        this.reportQtr = this.currentQtr;
+        this.getDesignation();
+        this.getSkills();
+        this.getReportEmployeeList();
+        this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
+        this.getReport();
+    }
+
+    //If Main Report Filter is Changed
+    changedReport(){
+        this.filterOption = this.reportOption;
+        this.getSkills();
+        if(this.reportOption == 'Primary'){
+            this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
+            this.reportDesignation = 0;
+            this.reportSkill = 0;
+            this.reportDeployment = -1;
+            this.reportEmployeeId = 0;
+            this.reportEvaluated = -1;
+            this.reportMatrixScore = 0;
+            this.reportLongivityScore = 0;
+            this.reportExperienceScore = 0;
+            this.reportSkillScore =0;
+
+
+        }
+        else if(this.reportOption == 'Horizon3'){
+            this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Rating'];
+        }
+        else if(this.reportOption == 'Upskill'){
+
+        }
+        this.getReport();
+    }
+
+    //If Designation Filter is Changed
+    changedDesignation(){
+        this.getReportEmployeeList();
+    }
+
+    //If Skill Filter is Changed
+    changedSkill(){
+        this.getReportEmployeeList();
+    }
+
+    //If Current Deployement Filter is Changed
+    changedDeployment(){
+        this.getReportEmployeeList();
+    }
+
+
+
+    //For Optgroup Designation for Report Filter
+    getDesignation(){
+        this.designationList = [];
+        var deptname = "";
+        var designation:Array<any> = [];
+        this.STService.getDesignation().subscribe((data : any[])=>{
+            if(data.length > 0){
+                this.role = 1;
+                for(let i=0;i<data.length;i++){
+                    if(deptname != data[i].Department_Name ){
+                        if(deptname != ''){
+                            var obj = {
+                                "department":deptname,
+                                "designation":designation
+                            };
+                            this.designationList.push(obj);
+                            deptname = '';
+                            designation = [];
+                        }
+                        deptname = data[i].Department_Name;
+                                         
+                    }
+                    designation.push({
+                        "id":data[i].Designation_Id,
+                        "name":data[i].Designation_Name
+                    });
+                }
+                var obj = {
+                    "department":deptname,
+                    "designation":designation
+                };
+                this.designationList.push(obj);
+            }
+        }, err => {
+            console.log(err);
+        })
+    }
+
+    //For Listing Skills for Report Filter
+    getSkills(){
+        this.skillList = [];
+        let type = {"s_type":this.reportOption};
+        let param = JSON.stringify(type);
+        this.STService.getSkillsList(param).subscribe((data : any[])=>{
+            if(data.length > 0){
+                for(let i=0;i<data.length;i++){
+                    var obj = {
+                    "id":data[i].s_id,
+                    "name":data[i].s_name
+                    };
+                    this.skillList.push(obj);
+                }
+            }
+        }, err => {
+            console.log(err);
+        })
+    }
+
+    //For Listing Employee for Report Filter
+    getReportEmployeeList(){
+        this.reportEmployeeList = [];
+        let desgination = this.reportDesignation;
+        let skill = this.reportSkill;
+        let deployment = this.reportDeployment;
+        let data = {"designation":desgination,"skill":skill,"deployment":deployment};
+        let param = JSON.stringify(data);
+        this.STService.getReportEmployeeList(param).subscribe((data : any[])=>{
+            if(data.length > 0){
+                for(let i=0;i<data.length;i++){
+                    this.reportEmployeeList.push(data[i]);
+                }
+            }
+        }, err => {
+            console.log(err);
+        })
+    }
+
+    //For Generating Report
+    getReport(){
+        this.reportTable = [];
+        let data = {};
+        if(this.reportOption == 'Primary'){
+            
+            data = {
+                'type': 'Primary',
+                'qtr': this.reportQtr,
+                'designation': this.reportDesignation,
+                'skill': this.reportSkill,
+                'deployment': this.reportDeployment,
+                'eid': this.reportEmployeeId,
+                'evaluated': this.reportEvaluated,
+                'matrix': this.reportMatrixScore,
+                'longivity': this.reportLongivityScore,
+                'experience': this.reportExperienceScore,
+                'skillscore': this.reportSkillScore
+            }
+        }
+        else if(this.reportOption == 'Horizon3'){
+            data = {
+                'type': 'Horizon3',
+                'designation': this.reportDesignation,
+                'skill': this.reportSkill,
+                'deployment': this.reportDeployment
+            }
+        }
+        let param = JSON.stringify(data);
+        console.log(param);
+        this.STService.getReport(param).subscribe((data : any[])=>{
+            console.log(data);
+            if(data.length > 0){
+                for(let i=0;i<data.length;i++){
+                    this.reportTable.push(data[i]);
+                }
+            }
+        }, err => {
+            console.log(err);
+        })
     }
 
 }

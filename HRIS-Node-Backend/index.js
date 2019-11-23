@@ -43,26 +43,6 @@ var server = app.listen(3000,  "127.0.0.1", function () {
 
 
 /*
-* Get master skills 
-* @param type[all,primary,secondary]
-* @return skillTracker Details
-*/
-app.get('/getSkillTypes', function (req, res) {
-   if(req.body.type=='all'){
-    connection.query('select * from skill_type', function (error, results, fields) {
-    if (error) throw error;
-    res.end(JSON.stringify(results));
-  });
-   }else{
-  connection.query('select * from skill_type where `s_type`=?', [req.body.type], function (error, results, fields) {
-    if (error) throw error;
-    res.end(JSON.stringify(results));
-  });
-   }
-});
-
-
-/*
 * Add SkillTracker Details 
 * @param e_id
 * @return skillTracker Details
@@ -88,25 +68,28 @@ function updateSkillTracker(params){
    var insertparameter = params;
    var sql = "SELECT * from skill_tracker WHERE evaluation_qtr='"+evaluation_qtr+"' and e_id = '"+e_id+"' and s_id = "+s_id;
    connection.query(sql, function (error, results, fields) {
-      if (error) throw error;
-      if(results.length && results[0].id && (matrix_score != results[0].matrix_score || longivity_score != results[0].longivity_score || experience_score != results[0].experience_score)){
-         var id = results[0].id;
-         var sql1 = "INSERT INTO skill_tracker_history(evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts) SELECT evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts FROM skill_tracker WHERE id = "+id;
-         connection.query(sql1,function (error1,result1,fileds1) {
-            if (error) throw error;
-            var sql1 = "UPDATE skill_tracker set evaluation_qtr = '"+evaluation_qtr+"', e_id = '"+e_id+"', s_id = "+s_id+", s_type = '"+s_type+"', matrix_score = "+matrix_score+", longivity_score = "+longivity_score+", experience_score = "+experience_score+", skill_score = "+skill_score+", evaluated = 0  WHERE id = "+id;
-            connection.query(sql1,function (error1,result1,fileds1) {
-               if (error) throw error;
-               return JSON.stringify(results);
-            });
-         });
-      }
-      else{
-         connection.query('INSERT INTO skill_tracker SET ?', insertparameter, function (error, results, fields) {
-            if (error) throw error;
-            return JSON.stringify(results);
-         });
-      }
+    	if (error) throw error;
+    	//console.log(results);
+      	if(results.length && results[0].id){
+      		if(matrix_score != results[0].matrix_score || longivity_score != results[0].longivity_score || experience_score != results[0].experience_score || skill_score != results[0].skill_score){
+      			var id = results[0].id;
+         		var sql1 = "INSERT INTO skill_tracker_history(evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts) SELECT evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts FROM skill_tracker WHERE id = "+id;
+         		connection.query(sql1,function (error1,result1,fileds1) {
+            		if (error) throw error;
+         		});
+         		var sql1 = "UPDATE skill_tracker set evaluation_qtr = '"+evaluation_qtr+"', e_id = '"+e_id+"', s_id = "+s_id+", s_type = '"+s_type+"', matrix_score = "+matrix_score+", longivity_score = "+longivity_score+", experience_score = "+experience_score+", skill_score = "+skill_score+", evaluated = 0  WHERE id = "+id;
+            	connection.query(sql1,function (error1,result1,fileds1) {
+               		if (error) throw error;
+               		return JSON.stringify(results);
+            	});
+        	}
+      	}
+      	else{
+        	connection.query('INSERT INTO skill_tracker SET ?', insertparameter, function (error, results, fields) {
+            	if (error) throw error;
+            	return JSON.stringify(results);
+         	});
+      	}
    });
 }
 
@@ -168,11 +151,13 @@ app.post('/getSkillDetailsHistory', function (req, res) {
 
 /*
 * Get active Employee List 
-* @param NA
+* @param Manager id
 * @return Employee List
 */
-app.get('/getEmployeeList', function (req, res) {
-   connection.query('SELECT Employee_Id,Employee_Name FROM employee WHERE Deleted IS NULL ', function (error, results, fields) {
+app.post('/getApprovalEmployeeList', function (req, res) {
+	var e_id = req.body.e_id;
+	var sql = "SELECT Employee_Id,Employee_Name FROM employee WHERE Deleted IS NULL and Reporting_Manager ='"+e_id+"'";
+   connection.query(sql, function (error, results, fields) {
     if (error) throw error;
     res.end(JSON.stringify(results));
   });
@@ -196,10 +181,146 @@ app.post('/approveSkillTracker', function (req, res) {
       var evaluated = params[i].evaluated;
       var manager = params[i].manager_e_id;
 
+      var sql1 = "INSERT INTO skill_tracker_history(evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts) SELECT evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts FROM skill_tracker WHERE id = "+rowid;
+      connection.query(sql1,function (error1,result1,fileds1) {
+        if (error1) throw error;
+      });
+
       var sql = "Update skill_tracker SET matrix_score = "+matrix+",longivity_score = "+longivity+", experience_score = "+longivity+", skill_score = "+skill+", evaluated = "+evaluated+", evaluated_on = now(), manager_e_id = '"+manager+"' WHERE id = "+rowid;
       connection.query(sql, function (error, results, fields) {
          if (error) throw error;
             res.end(JSON.stringify(results));
       });
    }
+});
+
+
+/*
+* Get Degination list departmentwise
+* @param NA
+* @return Designation
+*/
+app.get('/getDesignationList', function (req, res) {
+	var sql = "SELECT B.Department_Name,A.Designation_Id, A.Designation_Name FROM map_designations A join `aa_departments` B on A.Department_Id = B.Department_id Where A.Deleted_At is NULL Order by B.Department_Name,A.Designation_Name";
+   connection.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    res.end(JSON.stringify(results));
+  });
+});
+
+/*
+* Get Skill List
+* @param Skill Type
+* @return Skill List
+*/
+app.post('/getSkillsList', function (req, res) {
+	var s_type = req.body.s_type;
+	if(s_type != 'Upskill'){
+		var sql = "SELECT s_id,s_name FROM skill_type WHERE deleted_ts IS NULL and s_type = '"+s_type+"'";
+	}
+	else{
+		var sql = "SELECT s_id,s_name FROM skill_type WHERE deleted_ts IS NULL";	
+	}
+   connection.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    res.end(JSON.stringify(results));
+  });
+});
+
+/*
+* Get Employee List
+* @param Designation, Skills, Current Deployment
+* @return Employee List
+*/
+app.post('/getReportEmployeeList', function (req, res) {
+	var designation = req.body.designation;
+	var skill = req.body.skill;
+	var deployment = req.body.deployment;
+	var filter = "";
+	if(designation != 0){
+		filter  = filter + " and B.Current_Designation = "+designation;
+	}
+	if(skill != 0){
+		filter = filter + " and C.s_id = "+skill;
+	}
+	var sql = "SELECT Distinct(A.Employee_Id),A.Employee_Name FROM `employee` A JOin employee_company_history B on A.Employee_ID = B.Employee_Id join skill_tracker C on A.Employee_Id = C.e_id WHERE A.Deleted is NULL and B.Company_History_End_date is NULL"+filter;
+   connection.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    res.end(JSON.stringify(results));
+  });
+});
+
+/*
+* Get Report
+* @param Reports Filetr
+* @return report Table
+*/
+app.post('/getReport', function (req, res) {
+	var type = req.body.type;
+	var filter = "";
+	if(type == 'Primary'){
+		var qtr = req.body.qtr;
+	    var designation = req.body.designation;
+	    var skill = req.body.skill;
+	    var deployment =  req.body.deployment;
+	    var eid = req.body.eid;
+	    var evaluated =  req.body.evaluated;
+	   	var matrix =  req.body.matrix;
+	    var longivity =  req.body.longivity;
+	    var experience = req.body.experience;
+	    var skillscore = req.body.skillscore;
+
+	    if(designation != 0){
+	    	filter = filter + ' and B.Current_Designation = ' + designation;
+	    }
+	    if(skill != 0){
+	    	filter = filter + ' and D.s_id = ' + skill ;
+	    }
+	    if(deployment != -1){
+	    }
+	    if(eid != 0){
+	    	filter = filter + " and A.Employee_Id = '"+eid+"'";
+	    }
+	    if(evaluated != -1){
+	    	filter = filter + " and D.evaluated = " + evaluated;
+	    }
+	    if(matrix != 0){
+	    	filter = filter + " and D.matrix_score = " + matrix;
+	    }
+	    if(longivity != 0){
+	    	filter = filter + " and D.longivity_score = " + longivity;
+	    }
+	    if(experience != 0){
+	    	filter = filter + " and D.experience = " + experience;
+	    }
+	    if(skillscore != 0){
+	    	filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+	    }
+
+	    var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter;
+	}
+	else if(type == 'Horizon3'){
+		var designation = req.body.designation;
+	    var skill = req.body.skill;
+	    var deployment =  req.body.deployment;
+
+	    if(designation != 0){
+	    	filter = filter + ' and B.Current_Designation = ' + designation;
+	    }
+	    if(skill != 0){
+	    	filter = filter + ' and D.s_id = ' + skill ;
+	    }
+	    if(deployment != -1){
+	    }
+	    
+
+	    var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and  E.s_type = '"+type+"'"+filter;
+	}
+
+
+	console.log(sql);
+   	connection.query(sql, function (error, results, fields) {
+    	if (error) throw error;
+    	res.end(JSON.stringify(results));
+  	});
 });

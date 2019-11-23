@@ -20,6 +20,10 @@ const routes: Routes = [
                 path: 'skilltracker',
                 loadChildren: './skilltracker/skilltracker.module#SkilltrackerModule'
             },
+            {
+                path: 'cron',
+                loadChildren: './cron/cron.module#CronModule'
+            },
         ]
     }
 ];
