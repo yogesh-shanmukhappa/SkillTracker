@@ -22,10 +22,13 @@ export class CronService {
 		return Observable.of(PRIMARY_KEY).delay(100);
 	}
 
-
-
-	//For Generating Report
+	//For getting list of cron Jobs
 	getCronJobsList(){
 		return this.http.get(this.service_url+"getCronJobsList");
+	}
+
+	//For getting list of cron Jobs
+	runCron(data){
+		return this.http.post(this.service_url+"runCronNow",data,this.httpOptions);
 	}
 }

@@ -4,244 +4,409 @@ import { Http, ResponseContentType } from '@angular/http';
 import { Globals } from '../../shared';
 import {FormGroup, FormControl, Validators}  from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
-import { SkilltrackerService } from '../../provider/skilltracker/skilltracker.service'
+import { SkilltrackerService } from '../../provider/skilltracker/skilltracker.service';
+//import * as Highcharts from 'highcharts';
 
 
 @Component({
-    selector: 'app-skilltracker',
-    templateUrl: './skilltracker.component.html',
-    styleUrls: ['./skilltracker.component.scss'],
-    animations: [routerTransition()]
+	selector: 'app-skilltracker',
+	templateUrl: './skilltracker.component.html',
+	styleUrls: ['./skilltracker.component.scss'],
+	animations: [routerTransition()]
 })
 export class SkilltrackerComponent implements OnInit {
 	public quarter:Array<any> = [];
-    public alerts: Array<any> = [];
-    public sliders: Array<any> = [];
-    public evaluationQrtr: string[];
+	public alerts: Array<any> = [];
+	public sliders: Array<any> = [];
+	public evaluationQrtr: string[];
 
-    employeeID = 'EMP0001';
-    role = 0;
+	employeeID = 'EMP0001';
+	role = 0;
 
-    skillDetails: Array<any> = [];
-    secondarySkillDetails : Array<any> = [];
-    horizonSkillDetails:Array<any> = [];
-    display='none';
+	skillDetails: Array<any> = [];
+	secondarySkillDetails : Array<any> = [];
+	horizonSkillDetails:Array<any> = [];
+	display='none';
 
-    //Below variables are used to populate the values in respective score dropdowns
-    matrixScoreOption:Array<any> = [];
-    longivityScoreOption:Array<any> = [];
-    experienceScoreOption:Array<any> = [];
-    horizonSkillScoreOption:Array<any> = [];
-    evaluationStatusOption:Array<any> = [];
+	//Below variables are used to populate the values in respective score dropdowns
+	matrixScoreOption:Array<any> = [];
+	longivityScoreOption:Array<any> = [];
+	experienceScoreOption:Array<any> = [];
+	horizonSkillScoreOption:Array<any> = [];
+	evaluationStatusOption:Array<any> = [];
 
-    //Below variables are used to set current Qtr and check if selected Qtr is current or not
-    currentQtr:any;
-    isCurrentQtr: boolean = true;
+	//Below variables are used to set current Qtr and check if selected Qtr is current or not
+	currentQtr:any;
+	isCurrentQtr: boolean = true;
 
-    //Below Variable are used in Approval Tab functions
-    approvalQtr:string;
-    approvalEmployeeId:string;
-    isApprovalCurrentQtr:boolean = true;
-    employeeList:Array<any> = [];
-    approvalSkillDetails: Array<any> = [];
-    approvalHorizon3SkillDetails : Array<any> = [];
+	//Below Variable are used in Approval Tab functions
+	approvalQtr:string;
+	approvalEmployeeId:string;
+	isApprovalCurrentQtr:boolean = true;
+	employeeList:Array<any> = [];
+	approvalSkillDetails: Array<any> = [];
+	approvalHorizon3SkillDetails : Array<any> = [];
 
-    //Below are the varibles used for reporting
-    filterOption = 'Primary';
-    reportOption = 'Primary';
-    reportQtr:string;
-    reportDesignation=0;
-    reportSkill=0;
-    reportDeployment = -1;
-    reportEmployeeId = 0;
-    reportEvaluated = -1;
-    reportMatrixScore = 0;
-    reportProject = 0;
-    reportPeopleManager = 0;
-    reportLongivityScore = 0;
-    reportExperienceScore = 0;
-    reportSkillScore = 0;
-    designationList:Array<any> = [];
-    skillList:Array<any> = [];
-    reportEmployeeList:Array<any> = [];
-    reportColumns:Array<any> = [];
-    reportTable:Array<any> = [];
+	//Below are the varibles used for reporting
+	filterOption = 'Primary';
+	reportOption = 'Primary';
+	reportQtr:string;
+	reportDesignation=0;
+	reportSkill=0;
+	reportDeployment = -1;
+	reportEmployeeId = 0;
+	reportEvaluated = -1;
+	reportMatrixScore = 0;
+	reportProject = 0;
+	reportPeopleManager = 0;
+	reportLongivityScore = 0;
+	reportExperienceScore = 0;
+	reportSkillScore = 0;
+	designationList:Array<any> = [];
+	skillList:Array<any> = [];
+	reportEmployeeList:Array<any> = [];
+	reportColumns:Array<any> = [];
+	reportTable:Array<any> = [];
+
 	
-    constructor(private http: Http, private globals : Globals, private STService : SkilltrackerService) {
-        this.loadCurrentSkills();
-        this.getApprovalEmployeeList();
-    }
+	resourceTotalChart: Object;
+	resourceMatrixChart: Object;
+	resourceLongivityChart: Object;
+	resourceExperienceChart: Object;
+  	title: string;
 
-    ngOnInit() {
-        this.evaluationQrtr = this.getEvaluationQuarter();
-        
+	/*highcharts = Highcharts;
+	resourceTotalChart = {
+		chart:{type: 'column'},
+		title:{text: 'Total'},
+		xAxis:{categories: ['0','0.5','1','1.5','2','2.5','3','3.5','4'], crosshair: true},
+		yAxis:{min: 0, title: {text: 'No. of Employees'}},
+		tooltip : { headerFormat: '<span style = "font-size:10px">Skill Score: {point.key}</span><table>',
+      		pointFormat: '<tr><td style = "color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style = "padding:0"><b>{point.y:.1f}</b></td></tr>', 
+            footerFormat: '</table>', shared: true, useHTML: true
+      	},
+      	plotOptions : {
+         	column: {
+            	pointPadding: 0.2,
+            	borderWidth: 0
+         	}
+      	},
+      	series: [
+      		{
+        		name: 'No. of Employees',
+         		data: [1, 5, 8, 3, 0, 9, 15, 8,10]
+      		}
+      	]
+	};
 
-        //For Priamry Skills 
-        this.matrixScoreOption = [{'id':0,'name':'Select Score'},{'id':1,'name':'1 - Basic'},{'id':2,'name':'2 - Intermediate1'},{'id':3,'name':'3 - Intermediate2'},{'id':4,'name':'4 - Expert'} ];
-        this.longivityScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - More Than 18 Months"},{id:2, name:"2 - 8 to 18 Months"},{id:3, name:"3 - 4 to 7 Months"},{id:4, name:"4 - 0 1o 3 Months"}];
-        this.experienceScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - 0 to 3 Months"},{id:2, name:"2 - 4 to 7 Months"},{id:3, name:"3 - 8 to 15 Months"},{id:4, name:"4 - More Than 18 Months"}];
+   	/*chartOptions = {   
+    	chart:{type: 'column'},
+    	title:{text: 'Monthly Average Rainfall'},
+      	subtitle:{text: 'Source: WorldClimate.com'},
+      	xAxis:{categories: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], crosshair: true},     
+      	yAxis:{min: 0, title: {text: 'Rainfall (mm)'}},
+      	tooltip : { headerFormat: '<span style = "font-size:10px">{point.key}</span><table>',
+      		pointFormat: '<tr><td style = "color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style = "padding:0"><b>{point.y:.1f} mm</b></td></tr>', footerFormat: '</table>', shared: true, useHTML: true
+      	},
+      	plotOptions : {
+         	column: {
+            	pointPadding: 0.2,
+            	borderWidth: 0
+         	}
+      	},
+      	series: [
+      		{
+        		name: 'Tokyo',
+         		data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+      		}, 
+      		{
+         		name: 'New York',
+         		data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3]
+      		}, 
+      		{
+         		name: 'London',
+         		data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2]
+      		}, 
+      		{
+         		name: 'Berlin',
+         	data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
+      		}
+      	]
+    };*/
 
-        //FOr Horizon3 Skills
-        this.horizonSkillScoreOption = [{id:1, name:'Beginner'},{id:2, name:'Intermediate'},{id:3, name:'Advanced'}];  
-    }
+    /*chart = new Chart({
+      chart: {
+        type: 'column'
+      },
+      title: {
+        text: 'Linechart'
+      },
+      credits: { enabled: false },
+      series: [{ name: 'Line 1', data: [1, 2, 3] }]
+    });*/
+	
+	constructor(private http: Http, private globals : Globals, private STService : SkilltrackerService) {
+		this.loadCurrentSkills();
+		this.getApprovalEmployeeList();
 
-    //For Populating Evaluation Quarter List
-    getEvaluationQuarter() {
-        var month;
-        var year;
-        month = new Date().getMonth()+1;
-        year = new Date().getFullYear();
+		this.resourceTotalChart = {
+      		chart: {
+      			caption: 'Total',
+      			xAxisName: 'Skill Score',
+      			yAxisName: 'No. of Employees',
+      			theme: 'fusion',
+      			plotToolText: "Skill Score: $label <br> No. of Employees: $dataValue"
+      		},
+      		data: [
+		        { label: '0', value: '290' },
+		        { label: '0.5', value: '260' },
+		        { label: '1', value: '180' },
+		        { label: '1.5', value: '140' },
+		        { label: '2', value: '115' },
+		        { label: '2.5', value: '100' },
+		        { label: '3', value: '30' },
+		        { label: '3.5', value: '30' },
+		        { label: '4', value: '30' }
+      		]
+    	};
+
+		this.resourceMatrixChart = {
+			chart: {
+				caption: 'Matrix Score', 
+				xAxisName: 'Matrix Score', 
+				yAxisName: 'No. of Employees', 
+				theme: 'fusion',
+				plotToolText: "Matrix Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
+			},
+			categories: [{
+				category: [{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
+    		}],
+  			dataset: [
+  				{seriesname: "Designation 1", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
+    			{seriesname: "Designation 2", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
+    			{seriesname: "Designation 3", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]},
+    			{seriesname: "Designation 4", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
+    			{seriesname: "Designation 5", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
+    			{seriesname: "Designation 6", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]}
+ 			]
+		};
+
+		this.resourceLongivityChart = {
+			chart: {
+				caption: 'Longivity Score', 
+				xAxisName: 'Longivity Score', 
+				yAxisName: 'No. of Employees', 
+				theme: 'fusion',
+				plotToolText: "Longivity Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
+			},
+			categories: [{
+				category: [{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
+    		}],
+  			dataset: [
+  				{seriesname: "Designation 1", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
+    			{seriesname: "Designation 2", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
+    			{seriesname: "Designation 3", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]},
+    			{seriesname: "Designation 4", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
+    			{seriesname: "Designation 5", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
+    			{seriesname: "Designation 6", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]}
+ 			]
+		};
+
+		this.resourceExperienceChart = {
+			chart: {
+				caption: 'Experience Score', 
+				xAxisName: 'Experience Score', 
+				yAxisName: 'No. of Employees', 
+				theme: 'fusion',
+				plotToolText: "Experience Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
+			},
+			categories: [{
+				category: [{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
+    		}],
+  			dataset: [
+  				{seriesname: "Designation 1", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
+    			{seriesname: "Designation 2", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
+    			{seriesname: "Designation 3", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]},
+    			{seriesname: "Designation 4", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
+    			{seriesname: "Designation 5", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
+    			{seriesname: "Designation 6", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]}
+ 			]
+		};
+
+	}
+
+	ngOnInit() {
+		this.evaluationQrtr = this.getEvaluationQuarter();
+		
+
+		//For Priamry Skills 
+		this.matrixScoreOption = [{'id':0,'name':'Select Score'},{'id':1,'name':'1 - Basic'},{'id':2,'name':'2 - Intermediate1'},{'id':3,'name':'3 - Intermediate2'},{'id':4,'name':'4 - Expert'} ];
+		this.longivityScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - More Than 18 Months"},{id:2, name:"2 - 8 to 18 Months"},{id:3, name:"3 - 4 to 7 Months"},{id:4, name:"4 - 0 1o 3 Months"}];
+		this.experienceScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - 0 to 3 Months"},{id:2, name:"2 - 4 to 7 Months"},{id:3, name:"3 - 8 to 15 Months"},{id:4, name:"4 - More Than 18 Months"}];
+
+		//FOr Horizon3 Skills
+		this.horizonSkillScoreOption = [{id:1, name:'Beginner'},{id:2, name:'Intermediate'},{id:3, name:'Advanced'}];  
+	}
+
+	//For Populating Evaluation Quarter List
+	getEvaluationQuarter() {
+		var month;
+		var year;
+		month = new Date().getMonth()+1;
+		year = new Date().getFullYear();
 		this.currentQtr = "FY "+year+' Q'+Math.floor(month/3);
-        this.quarter.push("FY "+year+' Q'+Math.floor(month/3));
-        for(var i=1;i<=7;i++){
-            month = month-3;
-            if(month<3){
-                month = 12;
-                year--;
-            }
-            this.quarter.push("FY "+year+' Q'+Math.floor(month/3));
-        }
-        return this.quarter;
-    }
+		this.quarter.push("FY "+year+' Q'+Math.floor(month/3));
+		for(var i=1;i<=7;i++){
+			month = month-3;
+			if(month<3){
+				month = 12;
+				year--;
+			}
+			this.quarter.push("FY "+year+' Q'+Math.floor(month/3));
+		}
+		return this.quarter;
+	}
 
-    //For Creating Default/Current Qtr tables of Primary & Horizon3 Skills 
-    loadCurrentSkills(){
-        this.skillDetails = [];
-        this.secondarySkillDetails = [];
-        this.horizonSkillDetails = [];
+	//For Creating Default/Current Qtr tables of Primary & Horizon3 Skills 
+	loadCurrentSkills(){
+		this.skillDetails = [];
+		this.secondarySkillDetails = [];
+		this.horizonSkillDetails = [];
 
-        let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary"}
-        let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3"}
+		let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary"}
+		let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3"}
 
-        //PRIMARY SKILL DETAILS
-        let param = JSON.stringify(_jsonDtPrime);
-        this.STService.getLatestSkillDetails(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    this.skillDetails.push(data[i]);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
+		//PRIMARY SKILL DETAILS
+		let param = JSON.stringify(_jsonDtPrime);
+		this.STService.getLatestSkillDetails(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					this.skillDetails.push(data[i]);
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
 
-        //HORIZON3 SKILL DETAILS
-        param = JSON.stringify(_jsonDtHorizon3);
-        this.STService.getLatestSkillDetails(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    let dt = data[i].s_name;
-                    dt.replace(' ','_');
-                    data[i].s_model = dt;
-                    this.secondarySkillDetails.push(data[i]);
-                    if(data[i].id){
-                        this.horizonSkillDetails.push(data[i]);
-                        this.secondarySkillDetails[i].checked = true;
-                    }
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+		//HORIZON3 SKILL DETAILS
+		param = JSON.stringify(_jsonDtHorizon3);
+		this.STService.getLatestSkillDetails(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					let dt = data[i].s_name;
+					dt.replace(' ','_');
+					data[i].s_model = dt;
+					this.secondarySkillDetails.push(data[i]);
+					if(data[i].id){
+						this.horizonSkillDetails.push(data[i]);
+						this.secondarySkillDetails[i].checked = true;
+					}
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
 
-    //For Creating History Qtr tables of Primary & Horizon3 Skills 
-    loadHistorySkills(selectedQtr){
-        this.skillDetails = [];
-        this.secondarySkillDetails = [];
-        this.horizonSkillDetails = [];
+	//For Creating History Qtr tables of Primary & Horizon3 Skills 
+	loadHistorySkills(selectedQtr){
+		this.skillDetails = [];
+		this.secondarySkillDetails = [];
+		this.horizonSkillDetails = [];
 
-        let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary","evaluation_qtr":selectedQtr}
-        let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3","evaluation_qtr":selectedQtr}
+		let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary","evaluation_qtr":selectedQtr}
+		let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3","evaluation_qtr":selectedQtr}
 
-        //PRIMARY SKILL DETAILS
-        let param = JSON.stringify(_jsonDtPrime);
-        this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    this.skillDetails.push(data[i]);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-        //HORIZON3 SKILL DETAILS
-        param = JSON.stringify(_jsonDtHorizon3);
-        this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    let dt = data[i].s_name;
-                    dt.replace(' ','_');
-                    data[i].s_model = dt;
-                    this.secondarySkillDetails.push(data[i]);
-                    if(data[i].e_id){
-                        this.horizonSkillDetails.push(data[i]);
-                    }
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+		//PRIMARY SKILL DETAILS
+		let param = JSON.stringify(_jsonDtPrime);
+		this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					this.skillDetails.push(data[i]);
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+		//HORIZON3 SKILL DETAILS
+		param = JSON.stringify(_jsonDtHorizon3);
+		this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					let dt = data[i].s_name;
+					dt.replace(' ','_');
+					data[i].s_model = dt;
+					this.secondarySkillDetails.push(data[i]);
+					if(data[i].e_id){
+						this.horizonSkillDetails.push(data[i]);
+					}
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
 
-    //For Displaying History Data
-    onQuarterChange(selectedQtr){
-        if(this.currentQtr != selectedQtr){
-            this.isCurrentQtr = false;
-            this.loadHistorySkills(selectedQtr);
-        } 
-        else{
-            this.isCurrentQtr = true;
-            this.loadCurrentSkills();
-        }
-    }
+	//For Displaying History Data
+	onQuarterChange(selectedQtr){
+		if(this.currentQtr != selectedQtr){
+			this.isCurrentQtr = false;
+			this.loadHistorySkills(selectedQtr);
+		} 
+		else{
+			this.isCurrentQtr = true;
+			this.loadCurrentSkills();
+		}
+	}
 
-    //For Calculating Skill Score of Primary Skills on Matrix, Logivity & Experience score change
-    calculateSkillScore(_inx) {
-        var sumnum = (+this.skillDetails[_inx].matrix_score*0.5) + (+this.skillDetails[_inx].longivity_score*0.2) + (+this.skillDetails[_inx].experience_score*0.3);
-        this.skillDetails[_inx].skill_score = sumnum;
-    }    
+	//For Calculating Skill Score of Primary Skills on Matrix, Logivity & Experience score change
+	calculateSkillScore(_inx) {
+		var sumnum = (+this.skillDetails[_inx].matrix_score*0.5) + (+this.skillDetails[_inx].longivity_score*0.2) + (+this.skillDetails[_inx].experience_score*0.3);
+		this.skillDetails[_inx].skill_score = sumnum;
+	}    
 
-    //For Inserting Primary and Horizon3 skills in the table
-    onSubmit(skillIndex) {
+	//For Inserting Primary and Horizon3 skills in the table
+	onSubmit(skillIndex) {
 		if(skillIndex == 1 || skillIndex == '1'){
 			var jsonData = [];
-            let passDetails:string;
+			let passDetails:string;
 			for(var i=0;i<this.skillDetails.length;i++){
-                if(+this.skillDetails[i].skill_score > 0){
-                    var obj = {
-                        "evaluation_qtr":this.currentQtr,
-    					"e_id" : this.employeeID,
-    					"s_id" : this.skillDetails[i].s_id,
-    					"s_type": "Primary",
-    					"matrix_score" : this.skillDetails[i].matrix_score,
-    					"longivity_score" : this.skillDetails[i].longivity_score,
-    					"experience_score" : this.skillDetails[i].experience_score,
-    					"evaluated" : "0",
-    					"manager_e_id" : 0,
-    					"skill_score" : this.skillDetails[i].skill_score
-    				};
-    				jsonData.push(obj);
-				    passDetails = JSON.stringify(jsonData);
-                }
+				if(+this.skillDetails[i].skill_score > 0){
+					var obj = {
+						"evaluation_qtr":this.currentQtr,
+						"e_id" : this.employeeID,
+						"s_id" : this.skillDetails[i].s_id,
+						"s_type": "Primary",
+						"matrix_score" : this.skillDetails[i].matrix_score,
+						"longivity_score" : this.skillDetails[i].longivity_score,
+						"experience_score" : this.skillDetails[i].experience_score,
+						"evaluated" : "0",
+						"manager_e_id" : 0,
+						"skill_score" : this.skillDetails[i].skill_score
+					};
+					jsonData.push(obj);
+					passDetails = JSON.stringify(jsonData);
+				}
 			}
-            this.STService.saveSkillInformation(passDetails).subscribe(data=>{
-                let res:any = data;
-                console.log(data);
-                console.log(res);
-                if(res){  
-                  alert("success")
-                }else{
-                  alert("error")
-                }
-            });
+			this.STService.saveSkillInformation(passDetails).subscribe(data=>{
+				let res:any = data;
+				console.log(data);
+				console.log(res);
+				if(res){  
+				  alert("success")
+				}else{
+				  alert("error")
+				}
+			});
 		}
 		if(skillIndex == 2 || skillIndex == '2'){
 			var jsonData = [];
-            let passDetails:string;
+			let passDetails:string;
 			for(var i=0;i<this.horizonSkillDetails.length;i++){
 				var obj_s = {
-                    "evaluation_qtr":this.currentQtr,
+					"evaluation_qtr":this.currentQtr,
 					"e_id" : this.employeeID,
 					"s_id" : this.horizonSkillDetails[i].s_id,
 					"s_type": "Horizon3",
@@ -255,353 +420,352 @@ export class SkilltrackerComponent implements OnInit {
 				jsonData.push(obj_s);
 				passDetails = JSON.stringify(jsonData);
 			}
-            this.STService.saveSkillInformation(passDetails).subscribe(data=>{
-                let res:any = data;
-                if(res){  
-                  alert("success")
-                }else{
-                  alert("error")
-                }
-            });
+			this.STService.saveSkillInformation(passDetails).subscribe(data=>{
+				let res:any = data;
+				if(res){  
+				  alert("success")
+				}else{
+				  alert("error")
+				}
+			});
 		}
 	}
 
-    //For Updating Horizon3 table based on the Modal Selection
-    changeHorizonBox(model,inx){
-        let indexNo = -1
+	//For Updating Horizon3 table based on the Modal Selection
+	changeHorizonBox(model,inx){
+		let indexNo = -1
 		for(var i=0;i<this.horizonSkillDetails.length;i++){
 			if(this.horizonSkillDetails[i].s_id == this.secondarySkillDetails[inx].s_id){
 				indexNo = i;
 				break;
 			}
 		}
-        if(model && indexNo == -1){
-            this.horizonSkillDetails.push(this.secondarySkillDetails[inx]);
-        } else if(indexNo >= 0){
-            this.horizonSkillDetails.splice(indexNo,1);
-        }
-    }
+		if(model && indexNo == -1){
+			this.horizonSkillDetails.push(this.secondarySkillDetails[inx]);
+		} else if(indexNo >= 0){
+			this.horizonSkillDetails.splice(indexNo,1);
+		}
+	}
 
-    //For Opening Horizon3 Skills List Modal
-    openModalDialog(){
-        this.display='block'; //Set block css
-    }
-    
-    //For Closing Horizon3 Skills List Modal
-    closeModalDialog(){
-      this.display='none'; //set none css after close dialog
-    }
+	//For Opening Horizon3 Skills List Modal
+	openModalDialog(){
+		this.display='block'; //Set block css
+	}
+	
+	//For Closing Horizon3 Skills List Modal
+	closeModalDialog(){
+	  this.display='none'; //set none css after close dialog
+	}
 	 
 	/*** Approval section: tab2 ***/
-    prepareApprovalTab(){
-        this.approvalQtr = this.currentQtr;
-        if(this.approvalSkillDetails.length >0){
-            this.approvalEmployeeId = this.approvalSkillDetails[0].e_id;   
-        }
-        else{
-            this.approvalEmployeeId = "0";
-        }
-        this.evaluationStatusOption = [{id:0, name:'Pending'},{id:1, name:'Approved'}];
-    }
-    
-    //For Checking to Show or Hide Approval Tab and To Populate Employee Drop Down List
-    getApprovalEmployeeList(){
-        this.employeeList = [];
-        let emp = {"e_id":this.employeeID};
-        let param = JSON.stringify(emp);
-        this.STService.getApprovalEmployeeList(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                this.role = 1;
-                for(let i=0;i<data.length;i++){
-                    this.employeeList.push(data[i]);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+	prepareApprovalTab(){
+		this.approvalQtr = this.currentQtr;
+		if(this.approvalSkillDetails.length >0){
+			this.approvalEmployeeId = this.approvalSkillDetails[0].e_id;   
+		}
+		else{
+			this.approvalEmployeeId = "0";
+		}
+		this.evaluationStatusOption = [{id:0, name:'Pending'},{id:1, name:'Approved'}];
+	}
+	
+	//For Checking to Show or Hide Approval Tab and To Populate Employee Drop Down List
+	getApprovalEmployeeList(){
+		this.employeeList = [];
+		let emp = {"e_id":this.employeeID};
+		let param = JSON.stringify(emp);
+		this.STService.getApprovalEmployeeList(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				this.role = 1;
+				for(let i=0;i<data.length;i++){
+					this.employeeList.push(data[i]);
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
 
-    getApprovalData(){
-        this.approvalSkillDetails = [];
-        this.approvalHorizon3SkillDetails = [];
+	getApprovalData(){
+		this.approvalSkillDetails = [];
+		this.approvalHorizon3SkillDetails = [];
 
-        if(this.currentQtr != this.approvalQtr){
-            this.isApprovalCurrentQtr = false;
-        }
-        else{
-            this.isApprovalCurrentQtr = true;
-        }
+		if(this.currentQtr != this.approvalQtr){
+			this.isApprovalCurrentQtr = false;
+		}
+		else{
+			this.isApprovalCurrentQtr = true;
+		}
 
-        let _jsonDtPrime = {"e_id": this.approvalEmployeeId,"s_type":"Primary","evaluation_qtr":this.approvalQtr}
-        let _jsonDtHorizon3 = {"e_id": this.approvalEmployeeId,"s_type":"Horizon3","evaluation_qtr":this.approvalQtr}
+		let _jsonDtPrime = {"e_id": this.approvalEmployeeId,"s_type":"Primary","evaluation_qtr":this.approvalQtr}
+		let _jsonDtHorizon3 = {"e_id": this.approvalEmployeeId,"s_type":"Horizon3","evaluation_qtr":this.approvalQtr}
 
-        //PRIMARY SKILL DETAILS
-        let param = JSON.stringify(_jsonDtPrime);
-        this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    this.approvalSkillDetails.push(data[i]);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-        //HORIZON3 SKILL DETAILS
-        param = JSON.stringify(_jsonDtHorizon3);
-        this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    this.approvalHorizon3SkillDetails.push(data[i]);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+		//PRIMARY SKILL DETAILS
+		let param = JSON.stringify(_jsonDtPrime);
+		this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					this.approvalSkillDetails.push(data[i]);
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+		//HORIZON3 SKILL DETAILS
+		param = JSON.stringify(_jsonDtHorizon3);
+		this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					this.approvalHorizon3SkillDetails.push(data[i]);
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
 
-    //For Calculating Approval Skill Score of Primary Skills on Matrix, Logivity & Experience score change
-    calculateApprovalSkillScore(_inx) {
-        var sumnum = (+this.approvalSkillDetails[_inx].matrix_score*0.5) + (+this.approvalSkillDetails[_inx].longivity_score*0.2) + (+this.approvalSkillDetails[_inx].experience_score*0.3);
-        this.approvalSkillDetails[_inx].skill_score = sumnum;
-    }
+	//For Calculating Approval Skill Score of Primary Skills on Matrix, Logivity & Experience score change
+	calculateApprovalSkillScore(_inx) {
+		var sumnum = (+this.approvalSkillDetails[_inx].matrix_score*0.5) + (+this.approvalSkillDetails[_inx].longivity_score*0.2) + (+this.approvalSkillDetails[_inx].experience_score*0.3);
+		this.approvalSkillDetails[_inx].skill_score = sumnum;
+	}
 
-    //For Updating Approval Records in the table
-    saveApprovalData(skillIndex) {
-        if(skillIndex == 1 || skillIndex == '1'){
-            var jsonData = [];
-            let passDetails:string;
-            for(var i=0;i<this.approvalSkillDetails.length;i++){
-                var obj = {
-                    "id":this.approvalSkillDetails[i].id,
-                    "evaluation_qtr":this.approvalQtr,
-                    "e_id" : this.approvalEmployeeId,
-                    "s_id" : this.approvalSkillDetails[i].s_id,
-                    "s_type": "Primary",
-                    "matrix_score" : this.approvalSkillDetails[i].matrix_score,
-                    "longivity_score" : this.approvalSkillDetails[i].longivity_score,
-                    "experience_score" : this.approvalSkillDetails[i].experience_score,
-                    "skill_score" : this.approvalSkillDetails[i].skill_score,
-                    "evaluated" : this.approvalSkillDetails[i].evaluated,
-                    "manager_e_id" : this.employeeID
-                    
-                };
-                jsonData.push(obj);
-                passDetails = JSON.stringify(jsonData);
-            }
-            this.STService.saveApprovalData(passDetails).subscribe(data=>{
-                let res:any = data;
-                if(res){  
-                  alert("success")
-                }else{
-                  alert("error")
-                }
-            });
-        }
-        if(skillIndex == 2 || skillIndex == '2'){
-            var jsonData = [];
-            let passDetails:string;
-            for(var i=0;i<this.approvalHorizon3SkillDetails.length;i++){
-                if(+this.approvalHorizon3SkillDetails[i].evaluated != 0){
-                    var obj_s = {
-                        "id":this.approvalHorizon3SkillDetails[i].id,
-                        "evaluation_qtr":this.approvalQtr,
-                        "e_id" : this.approvalEmployeeId,
-                        "s_id" : this.approvalHorizon3SkillDetails[i].s_id,
-                        "s_type": "Horizon3",
-                        "matrix_score" : 0,
-                        "longivity_score" : 0,
-                        "experience_score" : 0,
-                        "skill_score" : this.approvalHorizon3SkillDetails[i].skill_score,
-                        "evaluated" : this.approvalHorizon3SkillDetails[i].evaluated,
-                        "manager_e_id" : this.employeeID
-                    };
-                    jsonData.push(obj_s);
-                    passDetails = JSON.stringify(jsonData);
-                }
-            }
-            this.STService.saveApprovalData(passDetails).subscribe(data=>{
-                let res:any = data;
-                if(res){  
-                  alert("success")
-                }else{
-                  alert("error")
-                }
-            });
-        }
-        this.getApprovalData();
-    }
+	//For Updating Approval Records in the table
+	saveApprovalData(skillIndex) {
+		if(skillIndex == 1 || skillIndex == '1'){
+			var jsonData = [];
+			let passDetails:string;
+			for(var i=0;i<this.approvalSkillDetails.length;i++){
+				var obj = {
+					"id":this.approvalSkillDetails[i].id,
+					"evaluation_qtr":this.approvalQtr,
+					"e_id" : this.approvalEmployeeId,
+					"s_id" : this.approvalSkillDetails[i].s_id,
+					"s_type": "Primary",
+					"matrix_score" : this.approvalSkillDetails[i].matrix_score,
+					"longivity_score" : this.approvalSkillDetails[i].longivity_score,
+					"experience_score" : this.approvalSkillDetails[i].experience_score,
+					"skill_score" : this.approvalSkillDetails[i].skill_score,
+					"evaluated" : this.approvalSkillDetails[i].evaluated,
+					"manager_e_id" : this.employeeID
+					
+				};
+				jsonData.push(obj);
+				passDetails = JSON.stringify(jsonData);
+			}
+			this.STService.saveApprovalData(passDetails).subscribe(data=>{
+				let res:any = data;
+				if(res){  
+				  alert("success")
+				}else{
+				  alert("error")
+				}
+			});
+		}
+		if(skillIndex == 2 || skillIndex == '2'){
+			var jsonData = [];
+			let passDetails:string;
+			for(var i=0;i<this.approvalHorizon3SkillDetails.length;i++){
+				if(+this.approvalHorizon3SkillDetails[i].evaluated != 0){
+					var obj_s = {
+						"id":this.approvalHorizon3SkillDetails[i].id,
+						"evaluation_qtr":this.approvalQtr,
+						"e_id" : this.approvalEmployeeId,
+						"s_id" : this.approvalHorizon3SkillDetails[i].s_id,
+						"s_type": "Horizon3",
+						"matrix_score" : 0,
+						"longivity_score" : 0,
+						"experience_score" : 0,
+						"skill_score" : this.approvalHorizon3SkillDetails[i].skill_score,
+						"evaluated" : this.approvalHorizon3SkillDetails[i].evaluated,
+						"manager_e_id" : this.employeeID
+					};
+					jsonData.push(obj_s);
+					passDetails = JSON.stringify(jsonData);
+				}
+			}
+			this.STService.saveApprovalData(passDetails).subscribe(data=>{
+				let res:any = data;
+				if(res){  
+				  alert("success")
+				}else{
+				  alert("error")
+				}
+			});
+		}
+		this.getApprovalData();
+	}
 
-    /*** Report section: tab3 ***/
-    prepareReportTab(){
-        this.reportQtr = this.currentQtr;
-        this.getDesignation();
-        this.getSkills();
-        this.getReportEmployeeList();
-        this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
-        this.getReport();
-    }
+	/*** Report section: tab3 ***/
+	prepareReportTab(){
+		this.reportQtr = this.currentQtr;
+		this.getDesignation();
+		this.getSkills();
+		this.getReportEmployeeList();
+		this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
+		this.getReport();
+	}
 
-    //If Main Report Filter is Changed
-    changedReport(){
-        this.filterOption = this.reportOption;
-        this.getSkills();
-        if(this.reportOption == 'Primary'){
-            this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
-            this.reportDesignation = 0;
-            this.reportSkill = 0;
-            this.reportDeployment = -1;
-            this.reportEmployeeId = 0;
-            this.reportEvaluated = -1;
-            this.reportMatrixScore = 0;
-            this.reportLongivityScore = 0;
-            this.reportExperienceScore = 0;
-            this.reportSkillScore =0;
-
-
-        }
-        else if(this.reportOption == 'Horizon3'){
-            this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Rating'];
-        }
-        else if(this.reportOption == 'Upskill'){
-
-        }
-        this.getReport();
-    }
-
-    //If Designation Filter is Changed
-    changedDesignation(){
-        this.getReportEmployeeList();
-    }
-
-    //If Skill Filter is Changed
-    changedSkill(){
-        this.getReportEmployeeList();
-    }
-
-    //If Current Deployement Filter is Changed
-    changedDeployment(){
-        this.getReportEmployeeList();
-    }
+	//If Main Report Filter is Changed
+	changedReport(){
+		this.filterOption = this.reportOption;
+		this.getSkills();
+		if(this.reportOption == 'Primary'){
+			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
+			this.reportDesignation = 0;
+			this.reportSkill = 0;
+			this.reportDeployment = -1;
+			this.reportEmployeeId = 0;
+			this.reportEvaluated = -1;
+			this.reportMatrixScore = 0;
+			this.reportLongivityScore = 0;
+			this.reportExperienceScore = 0;
+			this.reportSkillScore =0;
 
 
+		}
+		else if(this.reportOption == 'Horizon3'){
+			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Rating'];
+		}
+		else if(this.reportOption == 'Upskill'){
 
-    //For Optgroup Designation for Report Filter
-    getDesignation(){
-        this.designationList = [];
-        var deptname = "";
-        var designation:Array<any> = [];
-        this.STService.getDesignation().subscribe((data : any[])=>{
-            if(data.length > 0){
-                this.role = 1;
-                for(let i=0;i<data.length;i++){
-                    if(deptname != data[i].Department_Name ){
-                        if(deptname != ''){
-                            var obj = {
-                                "department":deptname,
-                                "designation":designation
-                            };
-                            this.designationList.push(obj);
-                            deptname = '';
-                            designation = [];
-                        }
-                        deptname = data[i].Department_Name;
-                                         
-                    }
-                    designation.push({
-                        "id":data[i].Designation_Id,
-                        "name":data[i].Designation_Name
-                    });
-                }
-                var obj = {
-                    "department":deptname,
-                    "designation":designation
-                };
-                this.designationList.push(obj);
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+		}
+		this.getReport();
+	}
 
-    //For Listing Skills for Report Filter
-    getSkills(){
-        this.skillList = [];
-        let type = {"s_type":this.reportOption};
-        let param = JSON.stringify(type);
-        this.STService.getSkillsList(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    var obj = {
-                    "id":data[i].s_id,
-                    "name":data[i].s_name
-                    };
-                    this.skillList.push(obj);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+	//If Designation Filter is Changed
+	changedDesignation(){
+		this.getReportEmployeeList();
+	}
 
-    //For Listing Employee for Report Filter
-    getReportEmployeeList(){
-        this.reportEmployeeList = [];
-        let desgination = this.reportDesignation;
-        let skill = this.reportSkill;
-        let deployment = this.reportDeployment;
-        let data = {"designation":desgination,"skill":skill,"deployment":deployment};
-        let param = JSON.stringify(data);
-        this.STService.getReportEmployeeList(param).subscribe((data : any[])=>{
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    this.reportEmployeeList.push(data[i]);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+	//If Skill Filter is Changed
+	changedSkill(){
+		this.getReportEmployeeList();
+	}
 
-    //For Generating Report
-    getReport(){
-        this.reportTable = [];
-        let data = {};
-        if(this.reportOption == 'Primary'){
-            
-            data = {
-                'type': 'Primary',
-                'qtr': this.reportQtr,
-                'designation': this.reportDesignation,
-                'skill': this.reportSkill,
-                'deployment': this.reportDeployment,
-                'eid': this.reportEmployeeId,
-                'evaluated': this.reportEvaluated,
-                'matrix': this.reportMatrixScore,
-                'longivity': this.reportLongivityScore,
-                'experience': this.reportExperienceScore,
-                'skillscore': this.reportSkillScore
-            }
-        }
-        else if(this.reportOption == 'Horizon3'){
-            data = {
-                'type': 'Horizon3',
-                'designation': this.reportDesignation,
-                'skill': this.reportSkill,
-                'deployment': this.reportDeployment
-            }
-        }
-        let param = JSON.stringify(data);
-        console.log(param);
-        this.STService.getReport(param).subscribe((data : any[])=>{
-            console.log(data);
-            if(data.length > 0){
-                for(let i=0;i<data.length;i++){
-                    this.reportTable.push(data[i]);
-                }
-            }
-        }, err => {
-            console.log(err);
-        })
-    }
+	//If Current Deployement Filter is Changed
+	changedDeployment(){
+		this.getReportEmployeeList();
+	}
+
+
+
+	//For Optgroup Designation for Report Filter
+	getDesignation(){
+		this.designationList = [];
+		var deptname = "";
+		var designation:Array<any> = [];
+		this.STService.getDesignation().subscribe((data : any[])=>{
+			if(data.length > 0){
+				this.role = 1;
+				for(let i=0;i<data.length;i++){
+					if(deptname != data[i].Department_Name ){
+						if(deptname != ''){
+							var obj = {
+								"department":deptname,
+								"designation":designation
+							};
+							this.designationList.push(obj);
+							deptname = '';
+							designation = [];
+						}
+						deptname = data[i].Department_Name;
+										 
+					}
+					designation.push({
+						"id":data[i].Designation_Id,
+						"name":data[i].Designation_Name
+					});
+				}
+				var obj = {
+					"department":deptname,
+					"designation":designation
+				};
+				this.designationList.push(obj);
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
+
+	//For Listing Skills for Report Filter
+	getSkills(){
+		this.skillList = [];
+		let type = {"s_type":this.reportOption};
+		let param = JSON.stringify(type);
+		this.STService.getSkillsList(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					var obj = {
+					"id":data[i].s_id,
+					"name":data[i].s_name
+					};
+					this.skillList.push(obj);
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
+
+	//For Listing Employee for Report Filter
+	getReportEmployeeList(){
+		this.reportEmployeeList = [];
+		let desgination = this.reportDesignation;
+		let skill = this.reportSkill;
+		let deployment = this.reportDeployment;
+		let data = {"designation":desgination,"skill":skill,"deployment":deployment};
+		let param = JSON.stringify(data);
+		this.STService.getReportEmployeeList(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					this.reportEmployeeList.push(data[i]);
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
+
+	//For Generating Report
+	getReport(){
+		this.reportTable = [];
+		let data = {};
+		if(this.reportOption == 'Primary'){
+			
+			data = {
+				'type': 'Primary',
+				'qtr': this.reportQtr,
+				'designation': this.reportDesignation,
+				'skill': this.reportSkill,
+				'deployment': this.reportDeployment,
+				'eid': this.reportEmployeeId,
+				'evaluated': this.reportEvaluated,
+				'matrix': this.reportMatrixScore,
+				'longivity': this.reportLongivityScore,
+				'experience': this.reportExperienceScore,
+				'skillscore': this.reportSkillScore
+			}
+		}
+		else if(this.reportOption == 'Horizon3'){
+			data = {
+				'type': 'Horizon3',
+				'designation': this.reportDesignation,
+				'skill': this.reportSkill,
+				'deployment': this.reportDeployment
+			}
+		}
+		let param = JSON.stringify(data);
+		this.STService.getReport(param).subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					this.reportTable.push(data[i]);
+					//console.log(this.resourceTotalChart.series[0].data)
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
 
 }

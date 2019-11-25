@@ -16,7 +16,7 @@ export class CronComponent implements OnInit {
 
 	cronJobs: Array<any> = [];
 
-	constructor(private http: Http, private globals : Globals, private STService : CronService) {
+	constructor(private http: Http, private globals : Globals, private CService : CronService) {
 		this.loadCronJobs();
 	}
 
@@ -24,12 +24,11 @@ export class CronComponent implements OnInit {
 
 	}
 
-	//For Creating Default/Current Qtr tables of Primary & Horizon3 Skills 
 	loadCronJobs(){
 		this.cronJobs = [];
 	
-		this.STService.getCronJobsList().subscribe((data : any[])=>{
-			console.log(data);
+		this.CService.getCronJobsList().subscribe((data : any[])=>{
+			//console.log(data);
 			if(data.length > 0){
 				for(let i=0;i<data.length;i++){
 					this.cronJobs.push(data[i]);
@@ -38,8 +37,18 @@ export class CronComponent implements OnInit {
 		}, err => {
 			console.log(err);
 		})
+	}
 
-		
+	runCron(id){
+		let param = JSON.stringify({"id":id});
+		//console.log(param);
+		this.CService.runCron(param).subscribe((data : any[])=>{
+			this.loadCronJobs();
+			
+			
+		}, err => {
+			console.log(err);
+		})
 	}
 
 }

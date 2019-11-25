@@ -469,8 +469,47 @@
                                                 <button type="button" class="btn btn-primary" (click)="getReport()">Generate</button>
                                             </div>
                                         </div>
-                                        <!-- Primary Skill Table -->
-                                        <div class="row">
+                                        <!-- Report Chart -->
+                                        <div class="row mt-5">
+                                        	<div class="col-12 col-md-6">
+                                        		<fusioncharts
+												width="90%"
+												height="350"
+												type="Column3d"
+												dataFormat="JSON"
+												[dataSource]="resourceTotalChart"
+												></fusioncharts>
+                                        	</div>
+                                        	<div class="col-12 col-md-6">
+                                        		<fusioncharts
+												width="90%"
+												height="350"
+												type="mscolumn3d"
+												dataFormat="JSON"
+												[dataSource]="resourceMatrixChart"
+												></fusioncharts>
+                                        	</div>
+                                        	<div class="col-12 col-md-6">
+                                        		<fusioncharts
+												width="90%"
+												height="350"
+												type="mscolumn3d"
+												dataFormat="JSON"
+												[dataSource]="resourceLongivityChart"
+												></fusioncharts>
+                                        	</div>
+                                        	<div class="col-12 col-md-6">
+                                        		<fusioncharts
+												width="90%"
+												height="350"
+												type="mscolumn3d"
+												dataFormat="JSON"
+												[dataSource]="resourceExperienceChart"
+												></fusioncharts>
+                                        	</div>
+                                        </div>
+                                        <!-- Report Table -->
+                                        <div class="row mt-5">
                                             <div class="col-12 mt-3 table-responsive">
                                                 <table style="width:100%">
                                                     <thead>
