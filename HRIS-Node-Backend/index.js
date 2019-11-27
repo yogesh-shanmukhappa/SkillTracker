@@ -218,7 +218,7 @@ app.post('/getSkillsList', function (req, res) {
 		var sql = "SELECT s_id,s_name FROM skill_type WHERE deleted_ts IS NULL and s_type = '"+s_type+"'";
 	}
 	else{
-		var sql = "SELECT s_id,s_name FROM skill_type WHERE deleted_ts IS NULL";	
+		var sql = "SELECT s_id,s_name FROM skill_type WHERE deleted_ts IS NULL and s_type = 'Primary'";	
 	}
 	connection.query(sql, function (error, results, fields) {
 		if (error) throw error;
@@ -237,12 +237,19 @@ app.post('/getReportEmployeeList', function (req, res) {
 	var deployment = req.body.deployment;
 	var filter = "";
 	if(designation != 0){
-		filter  = filter + " and B.Current_Designation = "+designation;
+		filter  = filter + " and B.Current_Designation in ("+designation+")";
 	}
 	if(skill != 0){
-		filter = filter + " and C.s_id = "+skill;
+		filter = filter + " and C.s_id in ("+skill+")";
 	}
-	var sql = "SELECT Distinct(A.Employee_Id),A.Employee_Name FROM `employee` A JOin employee_company_history B on A.Employee_ID = B.Employee_Id join skill_tracker C on A.Employee_Id = C.e_id WHERE A.Deleted is NULL and B.Company_History_End_date is NULL"+filter;
+	if(deployment != "0"){
+		var str = "-1";
+		for(let i=0;i<deployment.length;i++){
+			str = str + ",'"+deployment[i]+"'";
+		}
+		filter = filter + " and D.Deployable in ("+str+")";
+	}
+	var sql = "SELECT Distinct(A.Employee_Id),A.Employee_Name FROM `employee` A JOin employee_company_history B on A.Employee_ID = B.Employee_Id join skill_tracker C on A.Employee_Id = C.e_id join aa_resources D on A.Employee_Id = D.Employee_Id WHERE A.Deleted is NULL and B.Company_History_End_date is NULL"+filter;
 	connection.query(sql, function (error, results, fields) {
 		if (error) throw error;
 		res.end(JSON.stringify(results));
@@ -270,18 +277,23 @@ app.post('/getReport', function (req, res) {
 		var skillscore = req.body.skillscore;
 
 		if(designation != 0){
-			filter = filter + ' and B.Current_Designation = ' + designation;
+			filter = filter + ' and B.Current_Designation in (' + designation+")";
 		}
 		if(skill != 0){
-			filter = filter + ' and D.s_id = ' + skill ;
+			filter = filter + ' and D.s_id in (' + skill + ")" ;
 		}
-		if(deployment != -1){
+		if(deployment != "0"){
+			var str = "-1";
+			for(let i=0;i<deployment.length;i++){
+				str = str + ",'"+deployment[i]+"'";
+			}
+			filter = filter + " and G.Deployable in ("+str+")";
 		}
 		if(eid != 0){
 			filter = filter + " and A.Employee_Id = '"+eid+"'";
 		}
 		if(evaluated != -1){
-			filter = filter + " and D.evaluated = " + evaluated;
+			filter = filter + " and D.evaluated in (" + evaluated+")";
 		}
 		if(matrix != 0){
 			filter = filter + " and D.matrix_score = " + matrix;
@@ -296,31 +308,284 @@ app.post('/getReport', function (req, res) {
 			filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
 		}
 
-		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter;
+		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter;
+	}
+	else if(type == 'Upskill'){
+		var qtr = req.body.qtr;
+		var designation = req.body.designation;
+		var skill = req.body.skill;
+		var deployment =  req.body.deployment;
+		var eid = req.body.eid;
+		var evaluated =  req.body.evaluated;
+		var project = req.body.project;
+		var peoplemanager = req.body.peoplemanager;
+		var matrix =  req.body.matrix;
+		var longivity =  req.body.longivity;
+		var experience = req.body.experience;
+		var skillscore = req.body.skillscore;
+
+		if(designation != 0){
+			filter = filter + ' and B.Current_Designation in (' + designation+")";
+		}
+		if(skill != 0){
+			filter = filter + ' and D.s_id in (' + skill + ")" ;
+		}
+		if(deployment != "0"){
+			var str = "-1";
+			for(let i=0;i<deployment.length;i++){
+				str = str + ",'"+deployment[i]+"'";
+			}
+			filter = filter + " and G.Deployable in ("+str+")";
+		}
+		if(eid != 0){
+			filter = filter + " and A.Employee_Id = '"+eid+"'";
+		}
+		if(evaluated != -1){
+			filter = filter + " and D.evaluated in (" + evaluated+")";
+		}
+		if(project != 0){
+		}
+		if(peoplemanager != 0){
+		}
+		if(matrix != 0){
+			filter = filter + " and D.matrix_score = " + matrix;
+		}
+		if(longivity != 0){
+			filter = filter + " and D.longivity_score = " + longivity;
+		}
+		if(experience != 0){
+			filter = filter + " and D.experience = " + experience;
+		}
+		if(skillscore != 0){
+			filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+		}
+
+		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and E.s_type = 'Primary'"+filter+" ORDER BY D.evaluation_qtr DESC, A.Employee_Id";
 	}
 	else if(type == 'Horizon3'){
+		var qtr = req.body.qtr;
 		var designation = req.body.designation;
 		var skill = req.body.skill;
 		var deployment =  req.body.deployment;
 
 		if(designation != 0){
-			filter = filter + ' and B.Current_Designation = ' + designation;
+			filter = filter + ' and B.Current_Designation in (' + designation+")";
 		}
 		if(skill != 0){
-			filter = filter + ' and D.s_id = ' + skill ;
+			filter = filter + ' and D.s_id in (' + skill+")" ;
 		}
-		if(deployment != -1){
+		if(deployment != "0"){
+			var str = "-1";
+			for(let i=0;i<deployment.length;i++){
+				str = str + ",'"+deployment[i]+"'";
+			}
+			filter = filter + " and G.Deployable in ("+str+")";
 		}
 			
-		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and  E.s_type = '"+type+"'"+filter;
+		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and  E.s_type = '"+type+"'"+filter;
 	}
 
-
-	//console.log(sql);
 	connection.query(sql, function (error, results, fields) {
 		if (error) throw error;
 		res.end(JSON.stringify(results));
 	});
+});
+
+
+/*
+* Get Report
+* @param Reports Filetr
+* @return report Table
+*/
+app.post('/getChart', function (req, res) {
+	var type = req.body.type;
+	var filter = "";
+	if(type == 'Primary'){
+		var qtr = req.body.qtr;
+		var designation = req.body.designation;
+		var skill = req.body.skill;
+		var deployment =  req.body.deployment;
+		var eid = req.body.eid;
+		var evaluated =  req.body.evaluated;
+		var matrix =  req.body.matrix;
+		var longivity =  req.body.longivity;
+		var experience = req.body.experience;
+		var skillscore = req.body.skillscore;
+		var resourceChartResult = [];
+
+		if(designation != 0){
+			filter = filter + ' and B.Current_Designation in (' + designation+")";
+		}
+		if(skill != 0){
+			filter = filter + ' and D.s_id in (' + skill + ")" ;
+		}
+		if(deployment != "0"){
+			var str = "-1";
+			for(let i=0;i<deployment.length;i++){
+				str = str + ",'"+deployment[i]+"'";
+			}
+			filter = filter + " and G.Deployable in ("+str+")";
+		}
+		if(eid != 0){
+			filter = filter + " and A.Employee_Id = '"+eid+"'";
+		}
+		if(evaluated != -1){
+			filter = filter + " and D.evaluated in (" + evaluated+")";
+		}
+		if(matrix != 0){
+			filter = filter + " and D.matrix_score = " + matrix;
+		}
+		if(longivity != 0){
+			filter = filter + " and D.longivity_score = " + longivity;
+		}
+		if(experience != 0){
+			filter = filter + " and D.experience = " + experience;
+		}
+		if(skillscore != 0){
+			filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+		}
+
+		//QUERY FOR TOTAL CHART
+		var sql = "Select A.skill_score, COUNT(A.Employee_Id) as emp from (Select A.Employee_Id,ROUND(AVG(D.skill_score),1) as skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter+" GROUP BY A.Employee_Id Order BY skill_score) A GROUP BY A.skill_score ORDER BY skill_score";
+
+		//QUERY FOR MATRIX CHART
+		var sql1 = "Select A.Designation_Name,A.matrix_score,count(A.Employee_Id) as emp from (Select A.Employee_Id,C.Designation_Name,ROUND(AVG(D.matrix_score),1) as matrix_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter+" GROUP BY A.Employee_id Order BY matrix_score) A GROUP BY A.Designation_Name, A.matrix_score ORDER BY Designation_Name,matrix_score";
+
+		//QUERY FOR LONGIVITY CHART
+		var sql2 = "Select A.Designation_Name,A.longivity_score,count(A.Employee_Id) as emp from (Select A.Employee_Id,C.Designation_Name,ROUND(AVG(D.longivity_score),1) as longivity_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter+" GROUP BY A.Employee_id Order BY longivity_score) A GROUP BY A.Designation_Name, A.longivity_score ORDER BY Designation_Name,longivity_score";
+
+		//QUERY FOR EXPERIENCE CHART
+		var sql3 = "Select A.Designation_Name,A.experience_score,count(A.Employee_Id) as emp from (Select A.Employee_Id,C.Designation_Name,ROUND(AVG(D.experience_score),1) as experience_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter+" GROUP BY A.Employee_id Order BY experience_score) A GROUP BY A.Designation_Name, A.experience_score ORDER BY Designation_Name,experience_score";
+		
+		connection.query(sql, function (error, results, fields) {
+			if (error) throw error;
+			resourceChartResult.push(results);
+
+			connection.query(sql1, function (error, results, fields) {
+				if (error) throw error;
+				resourceChartResult.push(results);
+				
+				connection.query(sql2, function (error, results, fields) {
+					if (error) throw error;
+					resourceChartResult.push(results);
+					
+					connection.query(sql3, function (error, results, fields) {
+						if (error) throw error;
+						resourceChartResult.push(results);
+						res.end(JSON.stringify(resourceChartResult));
+					});
+				});
+			});
+		});
+	}
+	else if(type == 'Upskill'){
+		var eid = req.body.eid;
+		if(eid != 0){
+			var qtr = req.body.qtr;
+			var designation = req.body.designation;
+			var skill = req.body.skill;
+			var deployment =  req.body.deployment;
+			var evaluated =  req.body.evaluated;
+			var project = req.body.project;
+			var peoplemanager = req.body.peoplemanager;
+			var matrix =  req.body.matrix;
+			var longivity =  req.body.longivity;
+			var experience = req.body.experience;
+			var skillscore = req.body.skillscore;
+			var upskillChartResult = [];
+
+			if(designation != 0){
+				filter = filter + ' and B.Current_Designation in (' + designation+")";
+			}
+			if(skill != 0){
+				filter = filter + ' and D.s_id in (' + skill + ")" ;
+			}
+			if(deployment != "0"){
+				var str = "-1";
+				for(let i=0;i<deployment.length;i++){
+					str = str + ",'"+deployment[i]+"'";
+				}
+				filter = filter + " and G.Deployable in ("+str+")";
+			}
+			if(evaluated != -1){
+				filter = filter + " and D.evaluated in (" + evaluated+")";
+			}
+			if(project != 0){
+			}
+			if(peoplemanager != 0){
+			}
+			if(matrix != 0){
+				filter = filter + " and D.matrix_score = " + matrix;
+			}
+			if(longivity != 0){
+				filter = filter + " and D.longivity_score = " + longivity;
+			}
+			if(experience != 0){
+				filter = filter + " and D.experience = " + experience;
+			}
+			if(skillscore != 0){
+				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+			}
+
+			//QUERY FOR SKILL TREND AVG CHART (FOR CHART 1 of UPSKILL)
+			var sql = "Select D.evaluation_qtr,C.Designation_Name,D.s_id,E.s_name,ROUND(AVG(D.skill_score),1) as skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr <= '"+qtr+"' and E.s_type = 'Primary'"+filter+" GROUP BY D.evaluation_qtr,C.Designation_Name,D.s_id Order BY C.Designation_Name,E.s_name";
+
+			//QUERY FOR SKILL TREND INDIVIDUAL CHART (FOR CHART 1 of UPSKILL)
+			var sql1 = "Select D.evaluation_qtr,C.Designation_Name,D.s_id,E.s_name,ROUND(AVG(D.skill_score),1) as skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr <= '"+qtr+"' and E.s_type = 'Primary' and D.e_id = '"+eid+"'"+filter+" GROUP BY D.evaluation_qtr,C.Designation_Name,D.s_id Order BY C.Designation_Name,E.s_name";
+
+			//QUERY FOR INDIVIDUAL CHART
+			var sql2 = "Select A.evaluation_qtr, B.s_name,A.skill_score from skill_tracker A join skill_type B on A.s_id = B.s_id Where A.e_id = '"+eid+"' and B.s_type = 'Primary' and A.evaluation_qtr = '"+qtr+"'";
+
+			connection.query(sql, function (error, results, fields) {
+				if (error) throw error;
+				upskillChartResult.push(results);
+
+				connection.query(sql1, function (error, results, fields) {
+					if (error) throw error;
+					upskillChartResult.push(results);
+					
+					connection.query(sql2, function (error, results, fields) {
+						if (error) throw error;
+						upskillChartResult.push(results);
+						res.end(JSON.stringify(upskillChartResult));
+					});
+				});
+			});
+		}
+		else{
+			res.end(JSON.stringify(0));
+		}
+	}
+	else if(type == 'Horizon3'){
+		var qtr = req.body.qtr;
+		var designation = req.body.designation;
+		var skill = req.body.skill;
+		var deployment =  req.body.deployment;
+
+		if(designation != 0){
+			filter = filter + ' and B.Current_Designation in (' + designation+")";
+		}
+		if(skill != 0){
+			filter = filter + ' and D.s_id in (' + skill+")" ;
+		}
+		if(deployment != "0"){
+			var str = "-1";
+			for(let i=0;i<deployment.length;i++){
+				str = str + ",'"+deployment[i]+"'";
+			}
+			filter = filter + " and G.Deployable in ("+str+")";
+		}
+			
+		var sql = "Select E.s_name,D.skill_score,COUNT(A.Employee_Id) as emp from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and  E.s_type = '"+type+"'"+filter+" GROUP BY E.s_name, D.skill_score ORDER BY E.s_name,D.skill_score";
+		connection.query(sql, function (error, results, fields) {
+			if (error) throw error;
+			res.end(JSON.stringify(results));
+		});
+	}
+
+
+	
+	
 });
 
 

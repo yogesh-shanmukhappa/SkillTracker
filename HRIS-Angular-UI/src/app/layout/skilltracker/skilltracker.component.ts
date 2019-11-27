@@ -53,7 +53,7 @@ export class SkilltrackerComponent implements OnInit {
 	reportQtr:string;
 	reportDesignation=0;
 	reportSkill=0;
-	reportDeployment = -1;
+	reportDeployment = "0";
 	reportEmployeeId = 0;
 	reportEvaluated = -1;
 	reportMatrixScore = 0;
@@ -73,79 +73,10 @@ export class SkilltrackerComponent implements OnInit {
 	resourceMatrixChart: Object;
 	resourceLongivityChart: Object;
 	resourceExperienceChart: Object;
-  	title: string;
-
-	/*highcharts = Highcharts;
-	resourceTotalChart = {
-		chart:{type: 'column'},
-		title:{text: 'Total'},
-		xAxis:{categories: ['0','0.5','1','1.5','2','2.5','3','3.5','4'], crosshair: true},
-		yAxis:{min: 0, title: {text: 'No. of Employees'}},
-		tooltip : { headerFormat: '<span style = "font-size:10px">Skill Score: {point.key}</span><table>',
-      		pointFormat: '<tr><td style = "color:{series.color};padding:0">{series.name}: </td>' +
-            '<td style = "padding:0"><b>{point.y:.1f}</b></td></tr>', 
-            footerFormat: '</table>', shared: true, useHTML: true
-      	},
-      	plotOptions : {
-         	column: {
-            	pointPadding: 0.2,
-            	borderWidth: 0
-         	}
-      	},
-      	series: [
-      		{
-        		name: 'No. of Employees',
-         		data: [1, 5, 8, 3, 0, 9, 15, 8,10]
-      		}
-      	]
-	};
-
-   	/*chartOptions = {   
-    	chart:{type: 'column'},
-    	title:{text: 'Monthly Average Rainfall'},
-      	subtitle:{text: 'Source: WorldClimate.com'},
-      	xAxis:{categories: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], crosshair: true},     
-      	yAxis:{min: 0, title: {text: 'Rainfall (mm)'}},
-      	tooltip : { headerFormat: '<span style = "font-size:10px">{point.key}</span><table>',
-      		pointFormat: '<tr><td style = "color:{series.color};padding:0">{series.name}: </td>' +
-            '<td style = "padding:0"><b>{point.y:.1f} mm</b></td></tr>', footerFormat: '</table>', shared: true, useHTML: true
-      	},
-      	plotOptions : {
-         	column: {
-            	pointPadding: 0.2,
-            	borderWidth: 0
-         	}
-      	},
-      	series: [
-      		{
-        		name: 'Tokyo',
-         		data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-      		}, 
-      		{
-         		name: 'New York',
-         		data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3]
-      		}, 
-      		{
-         		name: 'London',
-         		data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2]
-      		}, 
-      		{
-         		name: 'Berlin',
-         	data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
-      		}
-      	]
-    };*/
-
-    /*chart = new Chart({
-      chart: {
-        type: 'column'
-      },
-      title: {
-        text: 'Linechart'
-      },
-      credits: { enabled: false },
-      series: [{ name: 'Line 1', data: [1, 2, 3] }]
-    });*/
+	upskillTrendChart: Object;
+	upskillIndividualChart: Object;
+	horizon3ScoreChart:Object;
+	
 	
 	constructor(private http: Http, private globals : Globals, private STService : SkilltrackerService) {
 		this.loadCurrentSkills();
@@ -159,59 +90,35 @@ export class SkilltrackerComponent implements OnInit {
       			theme: 'fusion',
       			plotToolText: "Skill Score: $label <br> No. of Employees: $dataValue"
       		},
-      		data: [
-		        { label: '0', value: '290' },
-		        { label: '0.5', value: '260' },
-		        { label: '1', value: '180' },
-		        { label: '1.5', value: '140' },
-		        { label: '2', value: '115' },
-		        { label: '2.5', value: '100' },
-		        { label: '3', value: '30' },
-		        { label: '3.5', value: '30' },
-		        { label: '4', value: '30' }
-      		]
+      		data: []
     	};
 
 		this.resourceMatrixChart = {
 			chart: {
 				caption: 'Matrix Score', 
 				xAxisName: 'Matrix Score', 
-				yAxisName: 'No. of Employees', 
+				yAxisName: 'No. of Employees',
 				theme: 'fusion',
 				plotToolText: "Matrix Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
 			},
 			categories: [{
-				category: [{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
+				category: [{label: "0"},{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
     		}],
-  			dataset: [
-  				{seriesname: "Designation 1", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
-    			{seriesname: "Designation 2", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
-    			{seriesname: "Designation 3", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]},
-    			{seriesname: "Designation 4", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
-    			{seriesname: "Designation 5", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
-    			{seriesname: "Designation 6", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]}
- 			]
+  			dataset: []
 		};
 
 		this.resourceLongivityChart = {
 			chart: {
 				caption: 'Longivity Score', 
 				xAxisName: 'Longivity Score', 
-				yAxisName: 'No. of Employees', 
+				yAxisName: 'No. of Employees',
 				theme: 'fusion',
 				plotToolText: "Longivity Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
 			},
 			categories: [{
-				category: [{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
+				category: [{label: "0"},{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
     		}],
-  			dataset: [
-  				{seriesname: "Designation 1", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
-    			{seriesname: "Designation 2", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
-    			{seriesname: "Designation 3", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]},
-    			{seriesname: "Designation 4", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
-    			{seriesname: "Designation 5", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
-    			{seriesname: "Designation 6", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]}
- 			]
+  			dataset: []
 		};
 
 		this.resourceExperienceChart = {
@@ -223,15 +130,51 @@ export class SkilltrackerComponent implements OnInit {
 				plotToolText: "Experience Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
 			},
 			categories: [{
-				category: [{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
+				category: [{label: "0"},{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
+    		}],
+  			dataset: []
+		};
+
+		this.upskillTrendChart = {
+			chart: {
+				caption: 'Quarterly Skill Score Trend', 
+				xAxisName: 'Quarters', 
+				yAxisName: 'Skill Score', 
+				theme: 'fusion',
+				plotToolText: "Quarter: $label <br> Skill Score: $dataValue <br> Legend: $seriesName"
+			},
+			categories: [{
+				category: []
+    		}],
+  			dataset: []
+		};
+
+		this.upskillIndividualChart = {
+      		chart: {
+      			caption: 'Current Individual Skill Score',
+      			xAxisName: 'Skills',
+      			yAxisName: 'Skill Score',
+      			theme: 'fusion',
+      			plotToolText: "Skill: $label <br> Skill Score: $dataValue"
+      		},
+      		data: []
+    	};
+
+		this.horizon3ScoreChart = {
+			chart: {
+				caption: 'Horizon3 Score Chart', 
+				xAxisName: 'Skills', 
+				yAxisName: 'No. of Employees', 
+				theme: 'fusion',
+				plotToolText: "Skill: $label <br> No. of Employees: $dataValue <br> Score: $seriesName"
+			},
+			categories: [{
+				category: []
     		}],
   			dataset: [
-  				{seriesname: "Designation 1", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
-    			{seriesname: "Designation 2", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
-    			{seriesname: "Designation 3", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]},
-    			{seriesname: "Designation 4", data: [ {value: "10"},{value: "20"},{value: "30"},{value: "40"}]},
-    			{seriesname: "Designation 5", data: [ {value: "40"},{value: "30"},{value: "20"},{value: "10"}]},
-    			{seriesname: "Designation 6", data: [ {value: "20"},{value: "40"},{value: "10"},{value: "30"}]}
+  				{seriesname: "Begineer", data: []},
+    			{seriesname: "Intermediate", data: []},
+    			{seriesname: "Advanced", data: []}
  			]
 		};
 
@@ -248,6 +191,14 @@ export class SkilltrackerComponent implements OnInit {
 
 		//FOr Horizon3 Skills
 		this.horizonSkillScoreOption = [{id:1, name:'Beginner'},{id:2, name:'Intermediate'},{id:3, name:'Advanced'}];  
+	}
+
+
+	employeeChange(){
+		console.log(this.employeeID);
+		this.role = 0;
+		this.loadCurrentSkills();
+		this.getApprovalEmployeeList();
 	}
 
 	//For Populating Evaluation Quarter List
@@ -614,22 +565,35 @@ export class SkilltrackerComponent implements OnInit {
 			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
 			this.reportDesignation = 0;
 			this.reportSkill = 0;
-			this.reportDeployment = -1;
+			this.reportDeployment = "0";
 			this.reportEmployeeId = 0;
 			this.reportEvaluated = -1;
 			this.reportMatrixScore = 0;
 			this.reportLongivityScore = 0;
 			this.reportExperienceScore = 0;
 			this.reportSkillScore =0;
-
-
+		}
+		else if(this.reportOption == 'Upskill'){
+			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
+			this.reportDesignation = 0;
+			this.reportSkill = 0;
+			this.reportDeployment = "0";
+			this.reportEmployeeId = 0;
+			this.reportEvaluated = -1;
+			this.reportProject = 0;
+			this.reportPeopleManager = 0;
+			this.reportMatrixScore = 0;
+			this.reportLongivityScore = 0;
+			this.reportExperienceScore = 0;
+			this.reportSkillScore =0;
 		}
 		else if(this.reportOption == 'Horizon3'){
 			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Rating'];
+			this.reportDesignation = 0;
+			this.reportSkill = 0;
+			this.reportDeployment = "0";
 		}
-		else if(this.reportOption == 'Upskill'){
 
-		}
 		this.getReport();
 	}
 
@@ -747,22 +711,251 @@ export class SkilltrackerComponent implements OnInit {
 				'skillscore': this.reportSkillScore
 			}
 		}
+		else if(this.reportOption == 'Upskill'){
+			
+			data = {
+				'type': 'Upskill',
+				'qtr': this.reportQtr,
+				'designation': this.reportDesignation,
+				'skill': this.reportSkill,
+				'deployment': this.reportDeployment,
+				'eid': this.reportEmployeeId,
+				'evaluated': this.reportEvaluated,
+				'project':this.reportProject,
+				'peoplemanager':this.reportPeopleManager,
+				'matrix': this.reportMatrixScore,
+				'longivity': this.reportLongivityScore,
+				'experience': this.reportExperienceScore,
+				'skillscore': this.reportSkillScore
+			}
+		}
 		else if(this.reportOption == 'Horizon3'){
 			data = {
 				'type': 'Horizon3',
+				'qtr': this.reportQtr,
 				'designation': this.reportDesignation,
 				'skill': this.reportSkill,
 				'deployment': this.reportDeployment
 			}
 		}
 		let param = JSON.stringify(data);
+		console.log("paramteres")
+		console.log(param);
+		this.getChart(param);
 		this.STService.getReport(param).subscribe((data : any[])=>{
 			if(data.length > 0){
 				for(let i=0;i<data.length;i++){
 					this.reportTable.push(data[i]);
-					//console.log(this.resourceTotalChart.series[0].data)
 				}
 			}
+		}, err => {
+			console.log(err);
+		})
+	}
+
+	getChart(param){
+		this.STService.getChart(param).subscribe((data : any[])=>{
+			if(this.filterOption == 'Primary'){
+				this.resourceTotalChart['data'] = [];
+				this.resourceMatrixChart['dataset'] = [];
+				this.resourceLongivityChart['dataset'] = [];
+				this.resourceExperienceChart['dataset'] = [];
+				var desig = "";
+				if(data.length > 0){
+					//FOR Skill Score Chart
+					var chart1 = data[0];
+					for(let i=0;i<chart1.length;i++){
+						this.resourceTotalChart['data'].push({"label":''+chart1[i].skill_score, "value":chart1[i].emp})
+					}
+
+					//FOR Matrix Score Chart
+					var chart2 = data[1];
+					for(let i=0;i<chart2.length;i++){
+						if(desig != chart2[i].Designation_Name){
+							desig = chart2[i].Designation_Name
+							this.resourceMatrixChart['dataset'].push({"seriesname":desig, "data":[{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"}]})
+						}
+						
+						var datasetlength = this.resourceMatrixChart['dataset'].length
+						if(this.resourceMatrixChart['dataset'][datasetlength - 1].seriesname == chart2[i].Designation_Name){
+							var score = Math.ceil(chart2[i].matrix_score);
+							this.resourceMatrixChart['dataset'][datasetlength - 1].data[score].value = +this.resourceMatrixChart['dataset'][datasetlength - 1].data[score].value+chart2[i].emp;
+						}
+					}
+
+					desig = '';
+					//FOR Longivity Score Chart
+					var chart3 = data[2];
+					for(let i=0;i<chart3.length;i++){
+						if(desig != chart3[i].Designation_Name){
+							desig = chart3[i].Designation_Name
+							this.resourceLongivityChart['dataset'].push({"seriesname":desig, "data":[{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"}]})
+						}
+						
+						var datasetlength = this.resourceLongivityChart['dataset'].length
+						if(this.resourceLongivityChart['dataset'][datasetlength - 1].seriesname == chart3[i].Designation_Name){
+							var score = Math.ceil(chart3[i].longivity_score);
+							this.resourceLongivityChart['dataset'][datasetlength - 1].data[score].value = +this.resourceLongivityChart['dataset'][datasetlength - 1].data[score].value+chart3[i].emp;
+						}
+					}
+
+					desig = '';
+					//FOR Experience Score Chart
+					var chart4 = data[3];
+					for(let i=0;i<chart4.length;i++){
+						if(desig != chart4[i].Designation_Name){
+							desig = chart4[i].Designation_Name
+							this.resourceExperienceChart['dataset'].push({"seriesname":desig, "data":[{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"}]})
+						}
+						
+						var datasetlength = this.resourceExperienceChart['dataset'].length
+						if(this.resourceExperienceChart['dataset'][datasetlength - 1].seriesname == chart4[i].Designation_Name){
+							var score = Math.ceil(chart4[i].experience_score);
+							this.resourceExperienceChart['dataset'][datasetlength - 1].data[score].value = +this.resourceExperienceChart['dataset'][datasetlength - 1].data[score].value+chart4[i].emp;
+						}
+					}
+				}
+			} // End for Primary Chart
+			else if(this.filterOption == 'Upskill' && this.reportEmployeeId != 0){
+				this.upskillIndividualChart['data'] = [];
+				this.upskillTrendChart['dataset'] = [];
+				this.upskillTrendChart['categories'][0].category = [];
+				let dataval = [];
+				//For polulating X axis with last 8 qtrs value 
+				//(i will start from 7 as quarter array will always have 8 values.To show less no. of qtrs start i from less than 7)
+				let xaxislen = 5;
+				for(let i=xaxislen-1;i>=0;i--){
+					this.upskillTrendChart['categories'][0]['category'].push({"label":this.quarter[i]});
+				}
+
+				//console.log(data);
+				if(data.length > 0){
+
+					//FOR Trend Chart Avg Score
+					var chart1 = data[0];
+					var desig = "";
+					var skill = "";
+					for(let i=0;i<chart1.length;i++){
+						if(desig != chart1[i].Designation_Name || skill != chart1[i].s_name){
+							desig = chart1[i].Designation_Name;
+							skill = chart1[i].s_name;
+							this.upskillTrendChart['dataset'].push({"seriesname":"Avg Score:"+desig+"-"+skill, "data":[]});
+							var datasetlength = this.upskillTrendChart['dataset'].length;
+							for(let j=0;j<xaxislen;j++){
+								this.upskillTrendChart['dataset'][+datasetlength - 1].data.push({"value":"0"});
+							}
+						}
+						
+						for(let j=0;j<this.upskillTrendChart['categories'][0]['category'].length;j++){
+							if(this.upskillTrendChart['categories'][0]['category'][j].label == chart1[i].evaluation_qtr){
+								var datasetlength = this.upskillTrendChart['dataset'].length;
+								if(this.upskillTrendChart['dataset'][+datasetlength - 1].seriesname == "Avg Score:"+desig+"-"+skill){
+									this.upskillTrendChart['dataset'][+datasetlength - 1].data[j].value = chart1[i].skill_score;
+								}
+
+							}
+						}
+					}
+
+					//FOR Trend Chart Individual Score
+					desig = '';
+					skill = '';
+					var chart2 = data[1];
+					for(let i=0;i<chart2.length;i++){
+						if(desig != chart2[i].Designation_Name || skill != chart2[i].s_name){
+							desig = chart2[i].Designation_Name;
+							skill = chart2[i].s_name;
+							this.upskillTrendChart['dataset'].push({"seriesname":"Individual Score:"+desig+"-"+skill, "data":[]});
+							var datasetlength = this.upskillTrendChart['dataset'].length;
+							for(let j=0;j<xaxislen;j++){
+								this.upskillTrendChart['dataset'][+datasetlength - 1].data.push({"value":"0"});
+							}
+						}
+						
+						for(let j=0;j<this.upskillTrendChart['categories'][0]['category'].length;j++){
+							if(this.upskillTrendChart['categories'][0]['category'][j].label == chart2[i].evaluation_qtr){
+								var datasetlength = this.upskillTrendChart['dataset'].length;
+								if(this.upskillTrendChart['dataset'][+datasetlength - 1].seriesname == "Individual Score:"+desig+"-"+skill){
+									this.upskillTrendChart['dataset'][+datasetlength - 1].data[j].value = chart2[i].skill_score;
+								}
+
+							}
+						}
+					}
+
+
+					//FOR Individual Skill Score Chart
+					var chart3 = data[2];
+					for(let i=0;i<chart3.length;i++){
+						this.upskillIndividualChart['data'].push({"label":''+chart3[i].s_name, "value":chart3[i].skill_score})
+					}
+
+					
+
+					
+					
+
+
+					console.log(this.upskillTrendChart);
+				}
+			} // End for Upskill Chart
+			else if(this.filterOption == 'Horizon3'){
+				var skill = "";
+				this.horizon3ScoreChart['categories'][0]['category'] = [];
+				this.horizon3ScoreChart['dataset'][0].data = [];
+				this.horizon3ScoreChart['dataset'][1].data = [];
+				this.horizon3ScoreChart['dataset'][2].data = [];
+				if(data.length > 0){
+					for(let i=0;i<data.length;i++){
+						if(skill != data[i].s_name){
+							skill = data[i].s_name
+							var obj = {"label":skill};
+							this.horizon3ScoreChart['categories'][0]['category'].push(obj);
+							if(skill != ''){
+								var categorylen = this.horizon3ScoreChart['categories'][0]['category'].length - 1;
+								var s1 = this.horizon3ScoreChart['dataset'][0].data.length;
+								var s2 = this.horizon3ScoreChart['dataset'][1].data.length;
+								var s3 = this.horizon3ScoreChart['dataset'][2].data.length;
+								if(categorylen != s1){
+									this.horizon3ScoreChart['dataset'][0].data.push({"value":"0"});
+								}
+								if(categorylen != s2){
+									this.horizon3ScoreChart['dataset'][1].data.push({"value":"0"});
+								}
+								if(categorylen != s3){
+									this.horizon3ScoreChart['dataset'][2].data.push({"value":"0"});
+								}
+							}
+						}
+
+						if(data[i].skill_score == 1){
+							this.horizon3ScoreChart['dataset'][0].data.push({"value":data[i].emp})
+						}
+						if(data[i].skill_score == 2){
+							this.horizon3ScoreChart['dataset'][1].data.push({"value":data[i].emp})
+						}
+						if(data[i].skill_score == 3){
+							this.horizon3ScoreChart['dataset'][2].data.push({"value":data[i].emp})
+						}
+					}
+
+					if(skill != ''){
+						categorylen = this.horizon3ScoreChart['categories'][0]['category'].length;
+						s1 = this.horizon3ScoreChart['dataset'][0].data.length;
+						s2 = this.horizon3ScoreChart['dataset'][1].data.length;
+						s3 = this.horizon3ScoreChart['dataset'][2].data.length;
+						if(categorylen != s1){
+							this.horizon3ScoreChart['dataset'][0].data.push({"value":"0"});
+						}
+						if(categorylen != s2){
+							this.horizon3ScoreChart['dataset'][1].data.push({"value":"0"});
+						}
+						if(categorylen != s3){
+							this.horizon3ScoreChart['dataset'][2].data.push({"value":"0"});
+						}
+					}
+				}
+			} // End for Horizon3 Chart
 		}, err => {
 			console.log(err);
 		})

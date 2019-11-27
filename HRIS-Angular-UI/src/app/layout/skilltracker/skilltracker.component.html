@@ -11,6 +11,19 @@
                         <div class="nav-link-column" >
                             <div class="nav-link-actions">
                                 <div class="nav-link-box">
+                                		<!-- Drop Down for Quarter -->
+                                        <div class="row">
+                                            <div class="col-12 col-sm-6 col-md-3">
+                                                <label class="field-label">Employee ID (temp)</label>
+                                                <select class="form-control" (change)="employeeChange()" [(ngModel)]="employeeID">
+                                                    <option value="EMP0001">EMP0001</option>
+                                                    <option value="EMP0002">EMP0002</option>
+                                                    <option value="EMP0003">EMP0003</option>
+                                                    <option value="EMP0004">EMP0004</option>
+                                                    <option value="EMP0005">EMP0005</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                         <!-- Drop Down for Quarter -->
                                         <div class="row">
                                             <div class="col-12 col-sm-6 col-md-3">
@@ -33,7 +46,7 @@
                                                         <th>SL No</th>
                                                         <th>Skills</th>
                                                         <th>Matrix Score</th>
-                                                        <th>Logivity Score</th>
+                                                        <th>Longivity Score</th>
                                                         <th>Experience Score</th>
                                                         <th>Skill Score</th>
                                                         <th>Evaluation</th>
@@ -205,7 +218,7 @@
                                                             <th>SL No</th>
                                                             <th>Skills</th>
                                                             <th>Matrix Score</th>
-                                                            <th>Logivity Score</th>
+                                                            <th>Longivity Score</th>
                                                             <th>Experience Score</th>
                                                             <th>Skill Score</th>
                                                             <th>Evaluation</th>
@@ -361,44 +374,49 @@
                                                 <select class="form-control" [(ngModel)]="reportOption" (change)="changedReport()">
                                                     <option value="Primary">Resourcing</option>
                                                     <option value="Upskill">Upskilling</option>
-                                                    <option value="Horizon3">Horizion3</option>
+                                                    <option value="Horizon3">Horizon3</option>
                                                 </select>
                                             </div>
-                                        </div>
-                                        <!-- Drop Down for Primary Filters -->
-                                        <div class="row">
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Primary'">
+                                            <div class="col-12 col-sm-4 col-md-3">
                                                 <label class="field-label">Evaluation  Quarter</label>
                                                 <select class="form-control" [(ngModel)]="reportQtr" >
                                                     <option *ngFor="let quarter of evaluationQrtr" value={{quarter}}>{{quarter}}</option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2">
+                                        </div>
+                                        <!-- Drop Down for Primary Filters -->
+                                        <div class="row">
+                                            
+                                            <div class="col-12 col-sm-4 col-md-3">
                                                 <label class="field-label">Designation</label>
-                                                <select class="form-control" [(ngModel)]="reportDesignation" (change)="changedDesignation()">
-                                                    <option value="0">Select Designation</option>
+                                                <select class="form-control" [(ngModel)]="reportDesignation" (change)="changedDesignation()" multiple>
                                                     <optgroup *ngFor = 'let dept of designationList' label="{{dept.department}}">
                                                         <option *ngFor = 'let desig of dept.designation' [value]="desig.id">{{desig.name}}</option> 
                                                     </optgroup>
                                                     
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2">
+                                            <div class="col-12 col-sm-4 col-md-3">
                                                 <label class="field-label">Skills</label>
-                                                <select class="form-control" [(ngModel)]="reportSkill" (change)="changedSkill()">
-                                                    <option value="0">Select Skills</option>
+                                                <select class="form-control" [(ngModel)]="reportSkill" (change)="changedSkill()" multiple>
                                                     <option *ngFor="let skill of skillList" value={{skill.id}}>{{skill.name}}</option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2">
+                                            <div class="col-12 col-sm-4 col-md-3">
                                                 <label class="field-label">Current Deployment</label>
-                                                <select class="form-control" [(ngModel)]="reportDeployment" (change)="changedDeployment()">
-                                                    <option value="-1">All</option>
+                                                <select class="form-control" [(ngModel)]="reportDeployment" (change)="changedDeployment()" multiple>
+                                                    <option value="Y">Yes</option>
+                                                    <option value="N">No</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
+                                                <label class="field-label">Manager Evaluated</label>
+                                                <select class="form-control" [(ngModel)]="reportEvaluated" multiple>
                                                     <option value="1">Yes</option>
                                                     <option value="0">No</option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Employee</label>
                                                 <select class="form-control" [(ngModel)]="reportEmployeeId">
                                                     <option value="0">Select Employee ID</option>
@@ -407,21 +425,14 @@
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
-                                                <label class="field-label">Manager Evaluated</label>
-                                                <select class="form-control" [(ngModel)]="reportEvaluated" >
-                                                    <option value="-1">All</option>
-                                                    <option value="1">Yes</option>
-                                                    <option value="0">No</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Upskill'">
+                                            
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Upskill'">
                                                 <label class="field-label">Project Account</label>
                                                 <select class="form-control" [(ngModel)]="reportProject" >
                                                     <option value="0">Select project</option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Upskill'">
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Upskill'">
                                                 <label class="field-label">People Manager</label>
                                                 <select class="form-control" [(ngModel)]="reportPeopleManager" >
                                                     <option value="0">Select Manager</option>
@@ -430,7 +441,7 @@
                                         </div>
                                         <!-- Drop Down for Secondary Filters -->
                                         <div class="row">
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Matrix Score</label>
                                                 <select class="form-control" [(ngModel)]="reportMatrixScore" >
                                                     <option *ngFor="let matrix of matrixScoreOption" value={{matrix.id}}>
@@ -438,15 +449,15 @@
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
-                                                <label class="field-label">Regency Score</label>
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
+                                                <label class="field-label">Recency Score</label>
                                                 <select class="form-control" [(ngModel)]="reportLongivityScore" >
                                                     <option *ngFor="let long of longivityScoreOption" value={{long.id}}>
                                                         {{long.name}}
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Experience Score</label>
                                                 <select class="form-control" [(ngModel)]="reportExperienceScore" >
                                                     <option *ngFor="let exp of experienceScoreOption" value={{exp.id}}>
@@ -454,7 +465,7 @@
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="col-12 col-sm-4 col-md-2" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
+                                            <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Skill Score</label>
                                                 <select class="form-control" [(ngModel)]="reportSkillScore" >
                                                     <option value="0">Select Score</option>
@@ -469,44 +480,79 @@
                                                 <button type="button" class="btn btn-primary" (click)="getReport()">Generate</button>
                                             </div>
                                         </div>
-                                        <!-- Report Chart -->
-                                        <div class="row mt-5">
+                                        <!-- Report Chart for Resourcing -->
+                                        <div class="row mt-5" *ngIf="filterOption == 'Primary'">
                                         	<div class="col-12 col-md-6">
                                         		<fusioncharts
-												width="90%"
+												width="100%"
 												height="350"
-												type="Column3d"
+												type="Column2d"
 												dataFormat="JSON"
 												[dataSource]="resourceTotalChart"
 												></fusioncharts>
                                         	</div>
                                         	<div class="col-12 col-md-6">
                                         		<fusioncharts
-												width="90%"
+												width="100%"
 												height="350"
-												type="mscolumn3d"
+												type="mscolumn2d"
 												dataFormat="JSON"
 												[dataSource]="resourceMatrixChart"
 												></fusioncharts>
                                         	</div>
                                         	<div class="col-12 col-md-6">
                                         		<fusioncharts
-												width="90%"
+												width="100%"
 												height="350"
-												type="mscolumn3d"
+												type="mscolumn2d"
 												dataFormat="JSON"
 												[dataSource]="resourceLongivityChart"
 												></fusioncharts>
                                         	</div>
                                         	<div class="col-12 col-md-6">
                                         		<fusioncharts
-												width="90%"
+												width="100%"
 												height="350"
-												type="mscolumn3d"
+												type="mscolumn2d"
 												dataFormat="JSON"
 												[dataSource]="resourceExperienceChart"
 												></fusioncharts>
                                         	</div>
+                                        </div>
+
+                                        <!-- Report Chart for Resourcing -->
+                                        <div class="row mt-5" *ngIf="filterOption == 'Upskill'">
+                                            <div class="col-12">
+                                                <fusioncharts
+                                                width="100%"
+                                                height="350"
+                                                type="msline"
+                                                dataFormat="JSON"
+                                                [dataSource]="upskillTrendChart"
+                                                ></fusioncharts>
+                                            </div>
+                                            <div class="col-12">
+                                                <fusioncharts
+                                                width="100%"
+                                                height="350"
+                                                type="Column2d"
+                                                dataFormat="JSON"
+                                                [dataSource]="upskillIndividualChart"
+                                                ></fusioncharts>
+                                            </div>
+                                        </div>
+
+                                        <!-- Report Chart for Horizon3 -->
+                                        <div class="row mt-5" *ngIf="filterOption == 'Horizon3'">
+                                            <div class="col-12">
+                                                <fusioncharts
+                                                width="100%"
+                                                height="350"
+                                                type="mscolumn2d"
+                                                dataFormat="JSON"
+                                                [dataSource]="horizon3ScoreChart"
+                                                ></fusioncharts>
+                                            </div>
                                         </div>
                                         <!-- Report Table -->
                                         <div class="row mt-5">
@@ -518,6 +564,22 @@
                                                     </thead>
                                                     <tbody>
                                                         <ng-container *ngIf="reportOption == 'Primary'">
+                                                            <tr *ngFor="let val of reportTable; let i = index">
+                                                                <td> <span>{{i+1}}</span> </td>
+                                                                <td> <span>{{val.Employee_Name}}</span> </td>
+                                                                <td> <span>{{val.Employee_Id}}</span></td>
+                                                                <td> <span>{{val.reporting_manager}}</span></td>
+                                                                <td> <span>{{val.Designation_Name}}</span></td>
+                                                                <td> <span>{{val.evaluation_qtr}}</span></td>
+                                                                <td> <span>{{val.s_name}}</span></td>
+                                                                <td> <span>{{val.matrix_score}}</span></td>
+                                                                <td> <span>{{val.longivity_score}}</span></td>
+                                                                <td> <span>{{val.experience_score}}</span></td>
+                                                                <td> <span>{{val.skill_score}}</span></td>
+                                                                <td> <span>{{val.evaluated?'Yes':'No'}}</span> </td>
+                                                            </tr>
+                                                        </ng-container>
+                                                        <ng-container *ngIf="reportOption == 'Upskill'">
                                                             <tr *ngFor="let val of reportTable; let i = index">
                                                                 <td> <span>{{i+1}}</span> </td>
                                                                 <td> <span>{{val.Employee_Name}}</span> </td>

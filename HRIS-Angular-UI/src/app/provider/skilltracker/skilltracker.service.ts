@@ -70,4 +70,9 @@ export class SkilltrackerService {
    getReport(data){
       return this.http.post(this.service_url+"getReport", data, this.httpOptions);
    }
+
+   //For Generating Report
+   getChart(data){
+      return this.http.post(this.service_url+"getChart", data, this.httpOptions);
+   }
 }
