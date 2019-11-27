@@ -582,10 +582,6 @@ app.post('/getChart', function (req, res) {
 			res.end(JSON.stringify(results));
 		});
 	}
-
-
-	
-	
 });
 
 
@@ -617,7 +613,55 @@ app.post('/runCronNow', function (req, res) {
 	}
 });
 
+/*
+* Auto Run Crom
+* @param NA
+* @return NA
+*/
+app.post('/autoRunCron', function (req,res) {
+	var current_qtr = getCurrentQuarter();
+	var insertBeforeDay=7;
+	var approveBeforeDay=2;
+	var insertCronDate;
+	var approveCronDate;
+	var temp;
+
+	if(current_qtr.split(' ')[2]=='Q1'){
+		temp=new Date(current_qtr.split(' ')[1], 6, 0).getDate();
+		insertCronDate=new Date(current_qtr.split(' ')[1],5,(temp-insertBeforeDay)+1);
+		approveCronDate=new Date(current_qtr.split(' ')[1],5,(temp-approveBeforeDay)+1);
+	}else if(current_qtr.split(' ')[2]=='Q2'){
+		temp=new Date(current_qtr.split(' ')[1], 9, 0).getDate();
+		insertCronDate=new Date(current_qtr.split(' ')[1],8,(temp-insertBeforeDay)+1);
+		approveCronDate=new Date(current_qtr.split(' ')[1],8,(temp-approveBeforeDay)+1);
+	}else if(current_qtr.split(' ')[2]=='Q3'){
+		temp=new Date(current_qtr.split(' ')[1], 12, 0).getDate();
+		insertCronDate=new Date(current_qtr.split(' ')[1],11,(temp-insertBeforeDay)+1);
+		approveCronDate=new Date(current_qtr.split(' ')[1],11,(temp-approveBeforeDay)+1);
+	}else if(current_qtr.split(' ')[2]=='Q4'){	
+		temp=new Date(current_qtr.split(' ')[1], 3, 0).getDate();
+		insertCronDate=new Date(current_qtr.split(' ')[1],2,(temp-insertBeforeDay)+1);
+		approveCronDate=new Date(current_qtr.split(' ')[1],2,(temp-approveBeforeDay)+1);
+	}
+
+	//var today = new Date();
+
+	var today = new Date(2019,11,25);
+
+	if(today.getTime() == insertCronDate.getTime()){
+		console.log('Here now 1')
+		autoInsertSkill(res);
+	}
+
+	if(today.getTime() == approveCronDate.getTime()){
+		autoApproveSkill(res);
+	}
+	//res.end(JSON.stringify(1));
+
+});
+
 function autoInsertSkill(res){
+	console.log('Here now 2');
 	var current_qtr = getCurrentQuarter();
 	var previous_qtr = getPreviousQuarter();
 	var sql = "SELECT Employee_id from employee Where Deleted is NULL and Employee_id NOT IN (SELECT DISTINCT(e_id) from skill_tracker where evaluation_qtr = '"+current_qtr+"')";
@@ -656,7 +700,31 @@ function autoApproveSkill(res){
 }
 
 function updateCronTable(id){
-	var sql = "Update cron_jobs SET last_run_date = now(), last_run_status = 1 WHERE id = "+id;
+	var current_qtr = getNextQuarter();
+	var day;
+	if(id==1)
+		day=7;
+	else 
+		day=2;
+	var nextDate;
+	var temp;
+	if(current_qtr.split(' ')[2]=='Q1'){
+		temp=new Date(current_qtr.split(' ')[1], 6, 0).getDate();
+		nextDate=new Date(current_qtr.split(' ')[1],5,(temp-day)+1);
+	}else if(current_qtr.split(' ')[2]=='Q2'){
+		temp=new Date(current_qtr.split(' ')[1], 9, 0).getDate();
+		nextDate=new Date(current_qtr.split(' ')[1],8,(temp-day)+1);
+	}else if(current_qtr.split(' ')[2]=='Q3'){
+		temp=new Date(current_qtr.split(' ')[1], 12, 0).getDate();
+		nextDate=new Date(current_qtr.split(' ')[1],11,(temp-day)+1);
+	}else if(current_qtr.split(' ')[2]=='Q4'){	
+		temp=new Date(current_qtr.split(' ')[1], 3, 0).getDate();
+		nextDate=new Date(current_qtr.split(' ')[1],2,(temp-day)+1);
+	}
+
+	var nextCronDate=nextDate.getFullYear()+'-'+nextDate.getMonth()+'-'+nextDate.getDate();
+
+	var sql = "Update cron_jobs SET last_run_date = now(), last_run_status = 1, next_run_date='"+nextCronDate+"'  WHERE id = "+id;
 	connection.query(sql, function (error, results, fields) {
 		if (error) throw error;
 	});
@@ -672,6 +740,17 @@ function getPreviousQuarter() {
 	var month = new Date().getMonth()+1;
 	var year = new Date().getFullYear();
 	month = month-3;
+   if(month<3){
+       month = 12;
+       year--;
+   }
+	return "FY "+year+' Q'+Math.floor(month/3);
+}
+
+function getNextQuarter() {
+	var month = new Date().getMonth()+1;
+	var year = new Date().getFullYear();
+	month = month+3;
    if(month<3){
        month = 12;
        year--;
