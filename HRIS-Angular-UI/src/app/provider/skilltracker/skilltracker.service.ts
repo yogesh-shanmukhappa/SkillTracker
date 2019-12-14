@@ -8,7 +8,7 @@ import {Http, Response, Headers, RequestOptions} from "@angular/http";
 
 @Injectable()
 export class SkilltrackerService {
-   service_url="http://127.0.0.1:3000/";
+   service_url="http://ec2-18-222-13-127.us-east-2.compute.amazonaws.com:3000/";
    httpOptions = {
     headers: new HttpHeaders({
     'Content-Type':  'application/json',

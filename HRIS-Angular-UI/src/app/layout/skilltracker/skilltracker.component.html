@@ -443,7 +443,7 @@
                                         <div class="row">
                                             <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Matrix Score</label>
-                                                <select class="form-control" [(ngModel)]="reportMatrixScore" >
+                                                <select class="form-control" [(ngModel)]="reportMatrixScore" (change)="updateReportSkillScore()">
                                                     <option *ngFor="let matrix of matrixScoreOption" value={{matrix.id}}>
                                                         {{matrix.name}}
                                                     </option>
@@ -451,7 +451,7 @@
                                             </div>
                                             <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Recency Score</label>
-                                                <select class="form-control" [(ngModel)]="reportLongivityScore" >
+                                                <select class="form-control" [(ngModel)]="reportLongivityScore" (change)="updateReportSkillScore()">
                                                     <option *ngFor="let long of longivityScoreOption" value={{long.id}}>
                                                         {{long.name}}
                                                     </option>
@@ -459,7 +459,7 @@
                                             </div>
                                             <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Experience Score</label>
-                                                <select class="form-control" [(ngModel)]="reportExperienceScore" >
+                                                <select class="form-control" [(ngModel)]="reportExperienceScore" (change)="updateReportSkillScore()">
                                                     <option *ngFor="let exp of experienceScoreOption" value={{exp.id}}>
                                                         {{exp.name}}
                                                     </option>
@@ -468,7 +468,7 @@
                                             <div class="col-12 col-sm-4 col-md-3" *ngIf="filterOption == 'Primary' || filterOption == 'Upskill'">
                                                 <label class="field-label">Skill Score</label>
                                                 <select class="form-control" [(ngModel)]="reportSkillScore" >
-                                                    <option value="0">Select Score</option>
+                                                    <option value="{{reportSkillScore}}">{{reportSkillScore}}</option>
                                                     <option value="1">0 to 1</option>
                                                     <option value="2">1 to 2</option>
                                                     <option value="3">2 to 3</option>

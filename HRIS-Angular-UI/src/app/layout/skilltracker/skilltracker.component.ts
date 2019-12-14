@@ -56,9 +56,9 @@ export class SkilltrackerComponent implements OnInit {
 	reportDeployment = "0";
 	reportEmployeeId = 0;
 	reportEvaluated = -1;
-	reportMatrixScore = 0;
 	reportProject = 0;
 	reportPeopleManager = 0;
+	reportMatrixScore = 0;
 	reportLongivityScore = 0;
 	reportExperienceScore = 0;
 	reportSkillScore = 0;
@@ -195,7 +195,6 @@ export class SkilltrackerComponent implements OnInit {
 
 
 	employeeChange(){
-		console.log(this.employeeID);
 		this.role = 0;
 		this.loadCurrentSkills();
 		this.getApprovalEmployeeList();
@@ -207,15 +206,23 @@ export class SkilltrackerComponent implements OnInit {
 		var year;
 		month = new Date().getMonth()+1;
 		year = new Date().getFullYear();
-		this.currentQtr = "FY "+year+' Q'+Math.floor(month/3);
-		this.quarter.push("FY "+year+' Q'+Math.floor(month/3));
+
+
+		month = month -3;//3 months is deducted from current month as fiscal qtr starts 3 months later than yearly qtr 
+		if(month < 1){
+			month = 12 + month;
+		    year--;
+		}
+
+		this.currentQtr = "FY "+year+' Q'+Math.ceil(month/3);
+		this.quarter.push("FY "+year+' Q'+Math.ceil(month/3));
 		for(var i=1;i<=7;i++){
 			month = month-3;
-			if(month<3){
-				month = 12;
+			if(month<1){
+				month = 12+month;
 				year--;
 			}
-			this.quarter.push("FY "+year+' Q'+Math.floor(month/3));
+			this.quarter.push("FY "+year+' Q'+Math.ceil(month/3));
 		}
 		return this.quarter;
 	}
@@ -343,8 +350,6 @@ export class SkilltrackerComponent implements OnInit {
 			}
 			this.STService.saveSkillInformation(passDetails).subscribe(data=>{
 				let res:any = data;
-				console.log(data);
-				console.log(res);
 				if(res){  
 				  alert("success")
 				}else{
@@ -542,9 +547,10 @@ export class SkilltrackerComponent implements OnInit {
 				}else{
 				  alert("error")
 				}
+				this.getApprovalData();
 			});
 		}
-		this.getApprovalData();
+		
 	}
 
 	/*** Report section: tab3 ***/
@@ -612,7 +618,10 @@ export class SkilltrackerComponent implements OnInit {
 		this.getReportEmployeeList();
 	}
 
-
+	updateReportSkillScore(){
+		var sumnum = (+this.reportMatrixScore*0.5) + (+this.reportLongivityScore*0.2) + (+this.reportExperienceScore*0.3);
+		this.reportSkillScore = sumnum;
+	}
 
 	//For Optgroup Designation for Report Filter
 	getDesignation(){
@@ -739,8 +748,6 @@ export class SkilltrackerComponent implements OnInit {
 			}
 		}
 		let param = JSON.stringify(data);
-		console.log("paramteres")
-		console.log(param);
 		this.getChart(param);
 		this.STService.getReport(param).subscribe((data : any[])=>{
 			if(data.length > 0){
@@ -827,8 +834,6 @@ export class SkilltrackerComponent implements OnInit {
 				for(let i=xaxislen-1;i>=0;i--){
 					this.upskillTrendChart['categories'][0]['category'].push({"label":this.quarter[i]});
 				}
-
-				//console.log(data);
 				if(data.length > 0){
 
 					//FOR Trend Chart Avg Score
@@ -889,14 +894,6 @@ export class SkilltrackerComponent implements OnInit {
 					for(let i=0;i<chart3.length;i++){
 						this.upskillIndividualChart['data'].push({"label":''+chart3[i].s_name, "value":chart3[i].skill_score})
 					}
-
-					
-
-					
-					
-
-
-					console.log(this.upskillTrendChart);
 				}
 			} // End for Upskill Chart
 			else if(this.filterOption == 'Horizon3'){

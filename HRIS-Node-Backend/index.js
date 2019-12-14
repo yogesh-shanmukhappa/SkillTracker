@@ -302,10 +302,15 @@ app.post('/getReport', function (req, res) {
 			filter = filter + " and D.longivity_score = " + longivity;
 		}
 		if(experience != 0){
-			filter = filter + " and D.experience = " + experience;
+			filter = filter + " and D.experience_score = " + experience;
 		}
 		if(skillscore != 0){
-			filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+			if(skillscore % 1 == 0){
+				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+			}
+			else{
+				filter = filter + " and D.skill_score =" + skillscore;	
+			}
 		}
 
 		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter;
@@ -354,10 +359,15 @@ app.post('/getReport', function (req, res) {
 			filter = filter + " and D.longivity_score = " + longivity;
 		}
 		if(experience != 0){
-			filter = filter + " and D.experience = " + experience;
+			filter = filter + " and D.experience_score = " + experience;
 		}
 		if(skillscore != 0){
-			filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+			if(skillscore % 1 == 0){
+				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+			}
+			else{
+				filter = filter + " and D.skill_score =" + skillscore;	
+			}
 		}
 
 		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and E.s_type = 'Primary'"+filter+" ORDER BY D.evaluation_qtr DESC, A.Employee_Id";
@@ -439,10 +449,15 @@ app.post('/getChart', function (req, res) {
 			filter = filter + " and D.longivity_score = " + longivity;
 		}
 		if(experience != 0){
-			filter = filter + " and D.experience = " + experience;
+			filter = filter + " and D.experience_score = " + experience;
 		}
 		if(skillscore != 0){
-			filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+			if(skillscore % 1 == 0){
+				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+			}
+			else{
+				filter = filter + " and D.skill_score =" + skillscore;	
+			}
 		}
 
 		//QUERY FOR TOTAL CHART
@@ -521,10 +536,15 @@ app.post('/getChart', function (req, res) {
 				filter = filter + " and D.longivity_score = " + longivity;
 			}
 			if(experience != 0){
-				filter = filter + " and D.experience = " + experience;
+				filter = filter + " and D.experience_score = " + experience;
 			}
 			if(skillscore != 0){
-				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+				if(skillscore % 1 == 0){
+					filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
+				}
+				else{
+					filter = filter + " and D.skill_score =" + skillscore;	
+				}
 			}
 
 			//QUERY FOR SKILL TREND AVG CHART (FOR CHART 1 of UPSKILL)
@@ -733,27 +753,45 @@ function updateCronTable(id){
 function getCurrentQuarter() {
 	var month = new Date().getMonth()+1;
 	var year = new Date().getFullYear();
-	return "FY "+year+' Q'+Math.floor(month/3);
+	
+	month = month -3;//3 months is deducted from current month as fiscal qtr starts 3 months later than yearly qtr 
+	if(month < 1){
+		month = 12 + month;
+	    year--;
+	}
+
+	return "FY "+year+' Q'+Math.ceil(month/3);
 }
 
 function getPreviousQuarter() {
 	var month = new Date().getMonth()+1;
 	var year = new Date().getFullYear();
-	month = month-3;
-   if(month<3){
-       month = 12;
-       year--;
-   }
-	return "FY "+year+' Q'+Math.floor(month/3);
+	
+	month = month -3;//3 months is deducted from current month as fiscal qtr starts 3 months later than yearly qtr 
+	if(month < 1){
+		month = 12 + month;
+	    year--;
+	}
+
+	month = month - 3; //This is for getting previous qtr
+
+	return "FY "+year+' Q'+Math.ceil(month/3);
 }
 
 function getNextQuarter() {
 	var month = new Date().getMonth()+1;
 	var year = new Date().getFullYear();
-	month = month+3;
-   if(month<3){
-       month = 12;
-       year--;
-   }
-	return "FY "+year+' Q'+Math.floor(month/3);
+	
+	month = month -3;//3 months is deducted from current month as fiscal qtr starts 3 months later than yearly qtr 
+	if(month < 1){
+		month = 12 + month;
+	    year--;
+	}
+
+	month = month + 3; //This is for getting next qtr
+	if(month > 12){
+		month = month-12;
+		year++;
+	}
+	return "FY "+year+' Q'+Math.ceil(month/3);
 }
