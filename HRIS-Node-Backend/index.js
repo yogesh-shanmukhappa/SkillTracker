@@ -12,8 +12,8 @@ var bodyParser = require('body-parser');
 //start mysql connection
 var connection = mysql.createConnection({
 	host     : 'localhost', //mysql database host name
-	user     : 'root', //mysql database user name
-	password : '', //mysql database password
+	user     : 'abhi', //mysql database user name
+	password : 'abhi', //mysql database password
 	database : 'dev_hris_database' //mysql database name
 });
 
@@ -51,8 +51,9 @@ app.post('/addSkillTracker', function (req, res) {
 	var params  = req.body;
 	var len = params.length;
 	for (var i=0; i< len; i++) {
-		res.end(updateSkillTracker(params[i]));
+            updateSkillTracker(params[i]);
 	}
+        res.end(JSON.stringify(1));
 });
 
 function updateSkillTracker(params){
@@ -182,7 +183,7 @@ app.post('/approveSkillTracker', function (req, res) {
 
 		var sql1 = "INSERT INTO skill_tracker_history(evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts) SELECT evaluation_qtr, e_id, s_id, s_type, matrix_score, longivity_score, experience_score, skill_score, evaluated, evaluated_on, manager_e_id, created_ts, deleted_ts FROM skill_tracker WHERE id = "+rowid;
 		connection.query(sql1,function (error1,result1,fileds1) {
-			if (error1) throw error;
+			if (error1) throw error1;
 		});
 
 		var sql = "Update skill_tracker SET matrix_score = "+matrix+",longivity_score = "+longivity+", experience_score = "+longivity+", skill_score = "+skill+", evaluated = "+evaluated+", evaluated_on = now(), manager_e_id = '"+manager+"' WHERE id = "+rowid;
@@ -292,7 +293,7 @@ app.post('/getReport', function (req, res) {
 		if(eid != 0){
 			filter = filter + " and A.Employee_Id = '"+eid+"'";
 		}
-		if(evaluated != -1){
+		if(evaluated != -1 && evaluated!= ''){
 			filter = filter + " and D.evaluated in (" + evaluated+")";
 		}
 		if(matrix != 0){
@@ -305,13 +306,8 @@ app.post('/getReport', function (req, res) {
 			filter = filter + " and D.experience_score = " + experience;
 		}
 		if(skillscore != 0){
-			if(skillscore % 1 == 0){
 				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
 			}
-			else{
-				filter = filter + " and D.skill_score =" + skillscore;	
-			}
-		}
 
 		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter;
 	}
@@ -345,7 +341,7 @@ app.post('/getReport', function (req, res) {
 		if(eid != 0){
 			filter = filter + " and A.Employee_Id = '"+eid+"'";
 		}
-		if(evaluated != -1){
+		if(evaluated != -1 && evaluated!= ''){
 			filter = filter + " and D.evaluated in (" + evaluated+")";
 		}
 		if(project != 0){
@@ -362,13 +358,8 @@ app.post('/getReport', function (req, res) {
 			filter = filter + " and D.experience_score = " + experience;
 		}
 		if(skillscore != 0){
-			if(skillscore % 1 == 0){
 				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
 			}
-			else{
-				filter = filter + " and D.skill_score =" + skillscore;	
-			}
-		}
 
 		var sql = "Select A.Employee_Id,A.Employee_Name,F.Employee_Name as reporting_manager,B.Current_Designation,C.Designation_Name,D.evaluation_qtr,D.s_id,E.s_name,D.matrix_score,D.longivity_score,D.experience_score,D.skill_score,D.evaluated from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and E.s_type = 'Primary'"+filter+" ORDER BY D.evaluation_qtr DESC, A.Employee_Id";
 	}
@@ -439,7 +430,7 @@ app.post('/getChart', function (req, res) {
 		if(eid != 0){
 			filter = filter + " and A.Employee_Id = '"+eid+"'";
 		}
-		if(evaluated != -1){
+		if(evaluated != -1 && evaluated!= ''){
 			filter = filter + " and D.evaluated in (" + evaluated+")";
 		}
 		if(matrix != 0){
@@ -452,13 +443,8 @@ app.post('/getChart', function (req, res) {
 			filter = filter + " and D.experience_score = " + experience;
 		}
 		if(skillscore != 0){
-			if(skillscore % 1 == 0){
 				filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
 			}
-			else{
-				filter = filter + " and D.skill_score =" + skillscore;	
-			}
-		}
 
 		//QUERY FOR TOTAL CHART
 		var sql = "Select A.skill_score, COUNT(A.Employee_Id) as emp from (Select A.Employee_Id,ROUND(AVG(D.skill_score),1) as skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr = '"+qtr+"' and E.s_type = '"+type+"'"+filter+" GROUP BY A.Employee_Id Order BY skill_score) A GROUP BY A.skill_score ORDER BY skill_score";
@@ -522,7 +508,7 @@ app.post('/getChart', function (req, res) {
 				}
 				filter = filter + " and G.Deployable in ("+str+")";
 			}
-			if(evaluated != -1){
+			if(evaluated != -1 && evaluated!= ''){
 				filter = filter + " and D.evaluated in (" + evaluated+")";
 			}
 			if(project != 0){
@@ -539,13 +525,8 @@ app.post('/getChart', function (req, res) {
 				filter = filter + " and D.experience_score = " + experience;
 			}
 			if(skillscore != 0){
-				if(skillscore % 1 == 0){
 					filter = filter + " and D.skill_score > " + (skillscore-1) + " and D.skill_score <=" + skillscore;
 				}
-				else{
-					filter = filter + " and D.skill_score =" + skillscore;	
-				}
-			}
 
 			//QUERY FOR SKILL TREND AVG CHART (FOR CHART 1 of UPSKILL)
 			var sql = "Select D.evaluation_qtr,C.Designation_Name,D.s_id,E.s_name,ROUND(AVG(D.skill_score),1) as skill_score from employee A join employee_company_history B on A.Employee_Id = B.Employee_Id join map_designations C on B.Current_Designation = C.Designation_Id join skill_tracker D on A.Employee_Id = D.e_id join skill_type E on D.s_id = E.s_id join employee F on A.Reporting_Manager = F.Employee_Id join aa_resources G on A.Employee_Id = G.Employee_Id Where A.Deleted is NULL and B.Company_History_End_date is NULL and D.evaluation_qtr <= '"+qtr+"' and E.s_type = 'Primary'"+filter+" GROUP BY D.evaluation_qtr,C.Designation_Name,D.s_id Order BY C.Designation_Name,E.s_name";
@@ -645,43 +626,86 @@ app.post('/autoRunCron', function (req,res) {
 	var insertCronDate;
 	var approveCronDate;
 	var temp;
+	var reminder1BeforeDay=30;
+	var reminder2BeforeDay=20;
+	var reminder3BeforeDay=10;
+
 
 	if(current_qtr.split(' ')[2]=='Q1'){
 		temp=new Date(current_qtr.split(' ')[1], 6, 0).getDate();
-		insertCronDate=new Date(current_qtr.split(' ')[1],5,(temp-insertBeforeDay)+1);
-		approveCronDate=new Date(current_qtr.split(' ')[1],5,(temp-approveBeforeDay)+1);
+		insertCronDate=new Date(current_qtr.split(' ')[1],5,(temp-insertBeforeDay));
+		approveCronDate=new Date(current_qtr.split(' ')[1],5,(temp-approveBeforeDay));
+		reminder1=new Date(current_qtr.split(' ')[1],5,(temp-reminder1BeforeDay));
+		reminder2=new Date(current_qtr.split(' ')[1],5,(temp-reminder2BeforeDay));
+		reminder3=new Date(current_qtr.split(' ')[1],5,(temp-reminder3BeforeDay));
 	}else if(current_qtr.split(' ')[2]=='Q2'){
 		temp=new Date(current_qtr.split(' ')[1], 9, 0).getDate();
-		insertCronDate=new Date(current_qtr.split(' ')[1],8,(temp-insertBeforeDay)+1);
-		approveCronDate=new Date(current_qtr.split(' ')[1],8,(temp-approveBeforeDay)+1);
+		insertCronDate=new Date(current_qtr.split(' ')[1],8,(temp-insertBeforeDay));
+		approveCronDate=new Date(current_qtr.split(' ')[1],8,(temp-approveBeforeDay));
+		reminder1=new Date(current_qtr.split(' ')[1],8,(temp-reminder1BeforeDay));
+		reminder2=new Date(current_qtr.split(' ')[1],8,(temp-reminder2BeforeDay));
+		reminder3=new Date(current_qtr.split(' ')[1],8,(temp-reminder3BeforeDay));
 	}else if(current_qtr.split(' ')[2]=='Q3'){
 		temp=new Date(current_qtr.split(' ')[1], 12, 0).getDate();
-		insertCronDate=new Date(current_qtr.split(' ')[1],11,(temp-insertBeforeDay)+1);
-		approveCronDate=new Date(current_qtr.split(' ')[1],11,(temp-approveBeforeDay)+1);
+		insertCronDate=new Date(current_qtr.split(' ')[1],11,(temp-insertBeforeDay));
+		approveCronDate=new Date(current_qtr.split(' ')[1],11,(temp-approveBeforeDay));
+		reminder1=new Date(current_qtr.split(' ')[1],11,(temp-reminder1BeforeDay));
+		reminder2=new Date(current_qtr.split(' ')[1],11,(temp-reminder2BeforeDay));
+		reminder3=new Date(current_qtr.split(' ')[1],11,(temp-reminder3BeforeDay));
 	}else if(current_qtr.split(' ')[2]=='Q4'){	
 		temp=new Date(current_qtr.split(' ')[1], 3, 0).getDate();
-		insertCronDate=new Date(current_qtr.split(' ')[1],2,(temp-insertBeforeDay)+1);
-		approveCronDate=new Date(current_qtr.split(' ')[1],2,(temp-approveBeforeDay)+1);
+		insertCronDate=new Date(current_qtr.split(' ')[1],2,(temp-insertBeforeDay));
+		approveCronDate=new Date(current_qtr.split(' ')[1],2,(temp-approveBeforeDay));
+		reminder1=new Date(current_qtr.split(' ')[1],2,(temp-reminder1BeforeDay));
+		reminder2=new Date(current_qtr.split(' ')[1],2,(temp-reminder2BeforeDay));
+		reminder3=new Date(current_qtr.split(' ')[1],2,(temp-reminder3BeforeDay));
 	}
 
-	//var today = new Date();
+	var today = new Date();
 
-	var today = new Date(2019,11,25);
+	//var today = new Date(2019,11,25);
 
-	if(today.getTime() == insertCronDate.getTime()){
-		console.log('Here now 1')
+	if(today.getTime() >= insertCronDate.getTime()){
 		autoInsertSkill(res);
-	}
-
-	if(today.getTime() == approveCronDate.getTime()){
+	}else if(today.getTime() >= approveCronDate.getTime()){
 		autoApproveSkill(res);
+	}else if(today.getTime() >= reminder3.getTime()){
+		skillReminder(res,3,reminder3BeforeDay);
+	}else if(today.getTime() >= reminder2.getTime()){
+		skillReminder(res,2,reminder2BeforeDay);
+	}else if(today.getTime() >= reminder1.getTime()){
+		skillReminder(res,1,reminder1BeforeDay);
 	}
-	//res.end(JSON.stringify(1));
 
+	/*console.log('today='+today);
+	console.log('insertCronDate='+insertCronDate);
+	console.log('approveCronDate='+approveCronDate);
+	console.log('reminder1='+reminder1);
+	console.log('reminder2='+reminder2);
+	console.log('reminder3='+reminder3);*/
+	//res.end(JSON.stringify(1));
 });
 
+function skillReminder(res,reminder,autoDay){
+	//console.log('Reminder='+reminder);
+	var current_qtr = getCurrentQuarter();
+	var sql = "SELECT Employee_Id,OfficialEmail_Id FROM `employee` WHERE Employee_Id NOT IN (Select DISTINCT e_id from skill_tracker where Deleted is NULL AND evaluation_qtr = '"+current_qtr+"')";
+	connection.query(sql, function (error, results, fields) {
+		if (error) throw error;
+		for(var i=0;i<results.length;i++){
+			var email = results[i].OfficialEmail_Id;
+			var subject="Reminder "+reminder+" : Please update your skills in Skill Tracker";
+			var body="Please update your Skill Tracker for current quarter before "+autoDay+" days else last quarter skills score will be updated for this quarter.";
+			if(email!=''){
+				sendEmail(email,subject,body);
+			}
+		}
+	});
+	res.end(JSON.stringify(1));
+}
+
 function autoInsertSkill(res){
-	console.log('Here now 2');
+	//console.log('autoInsertSkill');
 	var current_qtr = getCurrentQuarter();
 	var previous_qtr = getPreviousQuarter();
 	var sql = "SELECT Employee_id from employee Where Deleted is NULL and Employee_id NOT IN (SELECT DISTINCT(e_id) from skill_tracker where evaluation_qtr = '"+current_qtr+"')";
@@ -701,6 +725,7 @@ function autoInsertSkill(res){
 }
 
 function autoApproveSkill(res){
+	//console.log('autoApproveSkill');
 	var current_qtr = getCurrentQuarter();
 	var sql = "SELECT Employee_id,Reporting_Manager from employee Where Deleted is NULL and Employee_id IN (SELECT DISTINCT(e_id) from skill_tracker where evaluation_qtr = '"+current_qtr+"' and evaluated = 0)";
 	connection.query(sql, function (error, results, fields) {
@@ -795,3 +820,70 @@ function getNextQuarter() {
 	}
 	return "FY "+year+' Q'+Math.ceil(month/3);
 }
+
+function sendEmail(email,subject,body){
+	'use strict';
+	const nodemailer = require('nodemailer');
+	 
+	nodemailer.createTestAccount((err, account) => {
+	    let transporter = nodemailer.createTransport({
+	        host: 'smtp.googlemail.com', // Gmail Host
+	        port: 465, // Port
+	        secure: true, // this is true as port is 465
+	        auth: {
+	            user: 'abhinandan431@gmail.com', //Gmail username
+	            pass: 'kwywkebymmevmvnr' // Gmail password
+	        }
+	    });
+	 
+	    let mailOptions = {
+	        from: '"HRIS Skill Tracker" <abhinandan431@gmail.com.com>',
+	        to: email, // Recepient email address. Multiple emails can send separated by commas
+	        subject: subject,
+	        text: body
+	    };
+	 
+	    transporter.sendMail(mailOptions, (error, info) => {
+	        if (error) {
+	            return console.log(error);
+	        }
+	        //console.log('Message sent: %s', info.messageId);
+	    });
+	});
+}
+
+/*
+* Email Test Endpoint 
+* @param NA
+* @return String Msg
+*/
+app.get('/emailTest', function (req, res) {
+	'use strict';
+	const nodemailer = require('nodemailer');
+	 
+	nodemailer.createTestAccount((err, account) => {
+	    let transporter = nodemailer.createTransport({
+	        host: 'smtp.googlemail.com', // Gmail Host
+	        port: 465, // Port
+	        secure: true, // this is true as port is 465
+	        auth: {
+	            user: 'abhinandan431@gmail.com', //Gmail username
+	            pass: 'kwywkebymmevmvnr' // Gmail password
+	        }
+	    });
+	 
+	    let mailOptions = {
+	        from: '"Skill Tracker Reminder" <abhinandan431@gmail.com.com>',
+	        to: 'abhinandan432@gmail.com,info@epicsoftwareconsultancy.com', // Recepient email address. Multiple emails can send separated by commas
+	        subject: 'Reminder: Please Update Skill Tracker',
+	        text: 'This is the email sent through Gmail SMTP Server via node js by Abhinandan.'
+	    };
+	 
+	    transporter.sendMail(mailOptions, (error, info) => {
+	        if (error) {
+	            return console.log(error);
+	        }
+	        console.log('Message sent: %s', info.messageId);
+	    });
+	});
+});
