@@ -20,17 +20,21 @@ export class SkilltrackerComponent implements OnInit {
 	public sliders: Array<any> = [];
 	public evaluationQrtr: string[];
 
+	//Config Variables
 	employeeID = 'EMP0001';
-	role = 0;
+	role = 4;
+	gracePeriod = 30;
 
 	skillDetails: Array<any> = [];
-	secondarySkillDetails : Array<any> = [];
+	skillDetailsOriginal: Array<any> = [];
+	secondarySkillList:Array<any>=[];
 	horizonSkillDetails:Array<any> = [];
+	horizonSkillDetailsOriginal: Array<any> = [];
 	display='none';
 
 	//Below variables are used to populate the values in respective score dropdowns
 	matrixScoreOption:Array<any> = [];
-	longivityScoreOption:Array<any> = [];
+	recencyScoreOption:Array<any> = [];
 	experienceScoreOption:Array<any> = [];
 	horizonSkillScoreOption:Array<any> = [];
 	evaluationStatusOption:Array<any> = [];
@@ -45,10 +49,10 @@ export class SkilltrackerComponent implements OnInit {
 	isApprovalCurrentQtr:boolean = true;
 	employeeList:Array<any> = [];
 	approvalSkillDetails: Array<any> = [];
+	approvalSkillOriginal:Array<any> = [];
 	approvalHorizon3SkillDetails : Array<any> = [];
 
-	//Below are the varibles used for reporting
-	filterOption = 'Primary';
+	//Below are the variables used for reporting
 	reportOption = 'Primary';
 	reportQtr:string;
 	reportDesignation=0;
@@ -58,30 +62,40 @@ export class SkilltrackerComponent implements OnInit {
 	reportEvaluated = -1;
 	reportProject = 0;
 	reportPeopleManager = 0;
-	reportMatrixScore = 0;
-	reportLongivityScore = 0;
-	reportExperienceScore = 0;
 	reportSkillScore = 0;
+	reportButtonDisable:boolean = true;
 	designationList:Array<any> = [];
 	skillList:Array<any> = [];
 	reportEmployeeList:Array<any> = [];
-	reportColumns:Array<any> = [];
 	reportTable:Array<any> = [];
 
+
+	//reportMatrixScore = 0;
+	//reportRecencyScore = 0;
+	//reportExperienceScore = 0;
 	
 	resourceTotalChart: Object;
 	resourceMatrixChart: Object;
-	resourceLongivityChart: Object;
+	resourceRecencyChart: Object;
 	resourceExperienceChart: Object;
 	upskillTrendChart: Object;
 	upskillIndividualChart: Object;
 	horizon3ScoreChart:Object;
+
+	//Below are the variables used for setting
+	buttondisabled:boolean = false;
+	currentDate = new Date();
+	presentDate = this.currentDate.getDate()+"-"+(+this.currentDate.getMonth()+1)+"-"+this.currentDate.getFullYear();
+	lastUpdatedDate = '';
+	lastUpdatedBy = '';
+	matrixScoreWeight = 0;
+	recencyScoreWeight = 0;
+	experienceScoreWeight = 0;
 	
 	
 	constructor(private http: Http, private globals : Globals, private STService : SkilltrackerService) {
-		this.loadCurrentSkills();
-		this.getApprovalEmployeeList();
-
+		this.prepareSkillTrackerTab();
+		
 		this.resourceTotalChart = {
       		chart: {
       			caption: 'Total',
@@ -107,13 +121,13 @@ export class SkilltrackerComponent implements OnInit {
   			dataset: []
 		};
 
-		this.resourceLongivityChart = {
+		this.resourceRecencyChart = {
 			chart: {
-				caption: 'Longivity Score', 
-				xAxisName: 'Longivity Score', 
+				caption: 'Recency Score', 
+				xAxisName: 'Recency Score', 
 				yAxisName: 'No. of Employees',
 				theme: 'fusion',
-				plotToolText: "Longivity Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
+				plotToolText: "Recency Score: $label <br> No. of Employees: $dataValue <br> Designation: $seriesName"
 			},
 			categories: [{
 				category: [{label: "0"},{label: "1"},{label: "2"},{label: "3"},{label: "4"}]
@@ -185,27 +199,32 @@ export class SkilltrackerComponent implements OnInit {
 		
 
 		//For Priamry Skills 
-		this.matrixScoreOption = [{'id':0,'name':'Select Score'},{'id':1,'name':'1 - Basic'},{'id':2,'name':'2 - Intermediate1'},{'id':3,'name':'3 - Intermediate2'},{'id':4,'name':'4 - Expert'} ];
-		this.longivityScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - More Than 18 Months"},{id:2, name:"2 - 8 to 18 Months"},{id:3, name:"3 - 4 to 7 Months"},{id:4, name:"4 - 0 1o 3 Months"}];
-		this.experienceScoreOption = [{'id':0,'name':'Select score'},{id:1, name:"1 - 0 to 3 Months"},{id:2, name:"2 - 4 to 7 Months"},{id:3, name:"3 - 8 to 15 Months"},{id:4, name:"4 - More Than 18 Months"}];
+		this.matrixScoreOption = [{'id':0,'name':'N/A'},{'id':1,'name':'Basic'},{'id':2,'name':'Intermediate1'},{'id':3,'name':'Intermediate2'},{'id':4,'name':'Expert'} ];
+		this.recencyScoreOption = [{'id':0,'name':'N/A'},{id:1, name:"More Than 18 Months"},{id:2, name:"8 to 18 Months"},{id:3, name:"4 to 7 Months"},{id:4, name:"0 1o 3 Months"}];
+		this.experienceScoreOption = [{'id':0,'name':'N/A'},{id:1, name:"0 to 3 Months"},{id:2, name:"4 to 7 Months"},{id:3, name:"8 to 15 Months"},{id:4, name:"More Than 18 Months"}];
 
 		//FOr Horizon3 Skills
 		this.horizonSkillScoreOption = [{id:1, name:'Beginner'},{id:2, name:'Intermediate'},{id:3, name:'Advanced'}];  
 	}
 
+	prepareSkillTrackerTab(){
+		this.getScoreWeight();
+		this.loadCurrentSkills();
+	}
 
 	employeeChange(){
-		this.role = 0;
 		this.loadCurrentSkills();
-		this.getApprovalEmployeeList();
 	}
 
 	//For Populating Evaluation Quarter List
 	getEvaluationQuarter() {
+
+		var toDate = new Date();
+		toDate.setTime(toDate.getTime() -  (this.gracePeriod * 24 * 60 * 60 * 1000));
 		var month;
 		var year;
-		month = new Date().getMonth()+1;
-		year = new Date().getFullYear();
+		month = toDate.getMonth()+1;
+		year = toDate.getFullYear();
 
 
 		month = month -3;//3 months is deducted from current month as fiscal qtr starts 3 months later than yearly qtr 
@@ -230,38 +249,53 @@ export class SkilltrackerComponent implements OnInit {
 	//For Creating Default/Current Qtr tables of Primary & Horizon3 Skills 
 	loadCurrentSkills(){
 		this.skillDetails = [];
-		this.secondarySkillDetails = [];
+		this.secondarySkillList = [];
 		this.horizonSkillDetails = [];
-
-		let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary"}
-		let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3"}
+		this.skillDetailsOriginal = [];
+		this.horizonSkillDetailsOriginal = [];
 
 		//PRIMARY SKILL DETAILS
+		let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary"}
 		let param = JSON.stringify(_jsonDtPrime);
 		this.STService.getLatestSkillDetails(param).subscribe((data : any[])=>{
 			if(data.length > 0){
 				for(let i=0;i<data.length;i++){
+					if(data[i].evaluation_qtr != this.currentQtr){
+						data[i].evaluated = 2;
+						data[i].evaluated_on = "";
+						data[i].manager_name = "";
+					}
 					this.skillDetails.push(data[i]);
 				}
+				this.skillDetailsOriginal = JSON.parse(JSON.stringify(this.skillDetails));
 			}
 		}, err => {
 			console.log(err);
 		})
 
 		//HORIZON3 SKILL DETAILS
+		let _jsonDtHorizon3 = {"e_id": this.employeeID,"s_type":"Horizon3"}
 		param = JSON.stringify(_jsonDtHorizon3);
 		this.STService.getLatestSkillDetails(param).subscribe((data : any[])=>{
 			if(data.length > 0){
 				for(let i=0;i<data.length;i++){
-					let dt = data[i].s_name;
-					dt.replace(' ','_');
-					data[i].s_model = dt;
-					this.secondarySkillDetails.push(data[i]);
+					let obj = {
+						'id':data[i].s_id,
+						'name':data[i].s_name
+					};
+					this.secondarySkillList.push(obj);
+
+					if(data[i].evaluation_qtr != this.currentQtr){
+						data[i].evaluated = 2;
+						data[i].evaluated_on = "";
+						data[i].manager_name = "";
+					}
+
 					if(data[i].id){
 						this.horizonSkillDetails.push(data[i]);
-						this.secondarySkillDetails[i].checked = true;
 					}
 				}
+				this.horizonSkillDetailsOriginal = JSON.parse(JSON.stringify(this.horizonSkillDetails));
 			}
 		}, err => {
 			console.log(err);
@@ -271,7 +305,6 @@ export class SkilltrackerComponent implements OnInit {
 	//For Creating History Qtr tables of Primary & Horizon3 Skills 
 	loadHistorySkills(selectedQtr){
 		this.skillDetails = [];
-		this.secondarySkillDetails = [];
 		this.horizonSkillDetails = [];
 
 		let _jsonDtPrime = {"e_id": this.employeeID,"s_type":"Primary","evaluation_qtr":selectedQtr}
@@ -293,13 +326,7 @@ export class SkilltrackerComponent implements OnInit {
 		this.STService.getHistorySkillDetails(param).subscribe((data : any[])=>{
 			if(data.length > 0){
 				for(let i=0;i<data.length;i++){
-					let dt = data[i].s_name;
-					dt.replace(' ','_');
-					data[i].s_model = dt;
-					this.secondarySkillDetails.push(data[i]);
-					if(data[i].e_id){
-						this.horizonSkillDetails.push(data[i]);
-					}
+					this.horizonSkillDetails.push(data[i]);
 				}
 			}
 		}, err => {
@@ -321,7 +348,7 @@ export class SkilltrackerComponent implements OnInit {
 
 	//For Calculating Skill Score of Primary Skills on Matrix, Logivity & Experience score change
 	calculateSkillScore(_inx) {
-		var sumnum = (+this.skillDetails[_inx].matrix_score*0.5) + (+this.skillDetails[_inx].longivity_score*0.2) + (+this.skillDetails[_inx].experience_score*0.3);
+		var sumnum = (+this.skillDetails[_inx].matrix_score*this.matrixScoreWeight) + (+this.skillDetails[_inx].recency_score*this.recencyScoreWeight) + (+this.skillDetails[_inx].experience_score*this.experienceScoreWeight);
 		this.skillDetails[_inx].skill_score = sumnum;
 	}    
 
@@ -338,7 +365,7 @@ export class SkilltrackerComponent implements OnInit {
 						"s_id" : this.skillDetails[i].s_id,
 						"s_type": "Primary",
 						"matrix_score" : this.skillDetails[i].matrix_score,
-						"longivity_score" : this.skillDetails[i].longivity_score,
+						"recency_score" : this.skillDetails[i].recency_score,
 						"experience_score" : this.skillDetails[i].experience_score,
 						"evaluated" : "0",
 						"manager_e_id" : 0,
@@ -361,20 +388,22 @@ export class SkilltrackerComponent implements OnInit {
 			var jsonData = [];
 			let passDetails:string;
 			for(var i=0;i<this.horizonSkillDetails.length;i++){
-				var obj_s = {
-					"evaluation_qtr":this.currentQtr,
-					"e_id" : this.employeeID,
-					"s_id" : this.horizonSkillDetails[i].s_id,
-					"s_type": "Horizon3",
-					"matrix_score" : 0,
-					"longivity_score" : 0,
-					"experience_score" : 0,
-					"evaluated" : "0",
-					"manager_e_id" : 0,
-					"skill_score" : this.horizonSkillDetails[i].skill_score
-				};
-				jsonData.push(obj_s);
-				passDetails = JSON.stringify(jsonData);
+				if(JSON.stringify(this.horizonSkillDetails[i]) != JSON.stringify(this.horizonSkillDetailsOriginal[i]) || this.horizonSkillDetails[i].evaluated != 1){
+					var obj_s = {
+						"evaluation_qtr":this.currentQtr,
+						"e_id" : this.employeeID,
+						"s_id" : this.horizonSkillDetails[i].s_id,
+						"s_type": "Horizon3",
+						"matrix_score" : 0,
+						"recency_score" : 0,
+						"experience_score" : 0,
+						"evaluated" : "0",
+						"manager_e_id" : 0,
+						"skill_score" : this.horizonSkillDetails[i].skill_score
+					};
+					jsonData.push(obj_s);
+					passDetails = JSON.stringify(jsonData);
+				}
 			}
 			this.STService.saveSkillInformation(passDetails).subscribe(data=>{
 				let res:any = data;
@@ -387,34 +416,31 @@ export class SkilltrackerComponent implements OnInit {
 		}
 	}
 
-	//For Updating Horizon3 table based on the Modal Selection
-	changeHorizonBox(model,inx){
-		let indexNo = -1
-		for(var i=0;i<this.horizonSkillDetails.length;i++){
-			if(this.horizonSkillDetails[i].s_id == this.secondarySkillDetails[inx].s_id){
-				indexNo = i;
-				break;
-			}
+	//For adding Horizon3 Skills new row
+	addHorizonSkillRow(){
+		let len = this.horizonSkillDetails.length;
+		let skilllen = this.secondarySkillList.length;
+		if(len <skilllen){
+			let obj = JSON.parse(JSON.stringify(this.horizonSkillDetails[len-1]));
+			obj.id = "";
+			obj.s_id = 0;
+			obj.s_name = "";
+			obj.skill_score = 0;
+			obj.evaluated = 2;
+			obj.evaluated_on = "";
+			obj.manager_name = "";
+			this.horizonSkillDetails.push(obj);
 		}
-		if(model && indexNo == -1){
-			this.horizonSkillDetails.push(this.secondarySkillDetails[inx]);
-		} else if(indexNo >= 0){
-			this.horizonSkillDetails.splice(indexNo,1);
+		else{
+			alert('Maximum no. of rows reached.')
 		}
-	}
-
-	//For Opening Horizon3 Skills List Modal
-	openModalDialog(){
-		this.display='block'; //Set block css
 	}
 	
-	//For Closing Horizon3 Skills List Modal
-	closeModalDialog(){
-	  this.display='none'; //set none css after close dialog
-	}
+	
 	 
 	/*** Approval section: tab2 ***/
 	prepareApprovalTab(){
+		this.getApprovalEmployeeList();
 		this.approvalQtr = this.currentQtr;
 		if(this.approvalSkillDetails.length >0){
 			this.approvalEmployeeId = this.approvalSkillDetails[0].e_id;   
@@ -422,20 +448,43 @@ export class SkilltrackerComponent implements OnInit {
 		else{
 			this.approvalEmployeeId = "0";
 		}
-		this.evaluationStatusOption = [{id:0, name:'Pending'},{id:1, name:'Approved'}];
+		this.evaluationStatusOption = [{id:0, name:'Pending'},{id:1, name:'Approved'},{id:-1, name:'Decline'}];
 	}
 	
-	//For Checking to Show or Hide Approval Tab and To Populate Employee Drop Down List
+	//For Showing Categorized Employees list based on Reporting Employees and Other Employees
 	getApprovalEmployeeList(){
 		this.employeeList = [];
 		let emp = {"e_id":this.employeeID};
 		let param = JSON.stringify(emp);
+		var catname = "";
+		var employees:Array<any> = [];
 		this.STService.getApprovalEmployeeList(param).subscribe((data : any[])=>{
 			if(data.length > 0){
-				this.role = 1;
+				//this.role = 1;
 				for(let i=0;i<data.length;i++){
-					this.employeeList.push(data[i]);
+					if(catname != data[i].Category ){
+						if(catname != ''){
+							var obj = {
+								"category":catname,
+								"employees":employees
+							};
+							this.employeeList.push(obj);
+							catname = '';
+							employees = [];
+						}
+						catname = data[i].Category;
+										 
+					}
+					employees.push({
+						"id":data[i].Employee_Id,
+						"name":data[i].Employee_Name
+					});
 				}
+				var obj = {
+					"category":catname,
+					"employees":employees
+				};
+				this.employeeList.push(obj);
 			}
 		}, err => {
 			console.log(err);
@@ -444,6 +493,7 @@ export class SkilltrackerComponent implements OnInit {
 
 	getApprovalData(){
 		this.approvalSkillDetails = [];
+		this.approvalSkillOriginal = [];
 		this.approvalHorizon3SkillDetails = [];
 
 		if(this.currentQtr != this.approvalQtr){
@@ -462,7 +512,9 @@ export class SkilltrackerComponent implements OnInit {
 			if(data.length > 0){
 				for(let i=0;i<data.length;i++){
 					this.approvalSkillDetails.push(data[i]);
+					
 				}
+				this.approvalSkillOriginal = JSON.parse(JSON.stringify(this.approvalSkillDetails));
 			}
 		}, err => {
 			console.log(err);
@@ -481,10 +533,10 @@ export class SkilltrackerComponent implements OnInit {
 	}
 
 	//For Calculating Approval Skill Score of Primary Skills on Matrix, Logivity & Experience score change
-	calculateApprovalSkillScore(_inx) {
-		var sumnum = (+this.approvalSkillDetails[_inx].matrix_score*0.5) + (+this.approvalSkillDetails[_inx].longivity_score*0.2) + (+this.approvalSkillDetails[_inx].experience_score*0.3);
+	/*calculateApprovalSkillScore(_inx) {
+		var sumnum = (+this.approvalSkillDetails[_inx].matrix_score*this.matrixScoreWeight) + (+this.approvalSkillDetails[_inx].recency_score*this.recencyScoreWeight) + (+this.approvalSkillDetails[_inx].experience_score*this.experienceScoreWeight);
 		this.approvalSkillDetails[_inx].skill_score = sumnum;
-	}
+	}*/
 
 	//For Updating Approval Records in the table
 	saveApprovalData(skillIndex) {
@@ -492,22 +544,24 @@ export class SkilltrackerComponent implements OnInit {
 			var jsonData = [];
 			let passDetails:string;
 			for(var i=0;i<this.approvalSkillDetails.length;i++){
-				var obj = {
-					"id":this.approvalSkillDetails[i].id,
-					"evaluation_qtr":this.approvalQtr,
-					"e_id" : this.approvalEmployeeId,
-					"s_id" : this.approvalSkillDetails[i].s_id,
-					"s_type": "Primary",
-					"matrix_score" : this.approvalSkillDetails[i].matrix_score,
-					"longivity_score" : this.approvalSkillDetails[i].longivity_score,
-					"experience_score" : this.approvalSkillDetails[i].experience_score,
-					"skill_score" : this.approvalSkillDetails[i].skill_score,
-					"evaluated" : this.approvalSkillDetails[i].evaluated,
-					"manager_e_id" : this.employeeID
-					
-				};
-				jsonData.push(obj);
-				passDetails = JSON.stringify(jsonData);
+				if(JSON.stringify(this.approvalSkillDetails[i]) != JSON.stringify(this.approvalSkillOriginal[i])){
+					var obj = {
+						"id":this.approvalSkillDetails[i].id,
+						"evaluation_qtr":this.approvalQtr,
+						"e_id" : this.approvalEmployeeId,
+						"s_id" : this.approvalSkillDetails[i].s_id,
+						"s_type": "Primary",
+						//"matrix_score" : this.approvalSkillDetails[i].matrix_score,
+						//"recency_score" : this.approvalSkillDetails[i].recency_score,
+						//"experience_score" : this.approvalSkillDetails[i].experience_score,
+						//"skill_score" : this.approvalSkillDetails[i].skill_score,
+						"evaluated" : this.approvalSkillDetails[i].evaluated,
+						"manager_e_id" : this.employeeID
+						
+					};
+					jsonData.push(obj);
+					passDetails = JSON.stringify(jsonData);
+				}
 			}
 			this.STService.saveApprovalData(passDetails).subscribe(data=>{
 				let res:any = data;
@@ -530,7 +584,7 @@ export class SkilltrackerComponent implements OnInit {
 						"s_id" : this.approvalHorizon3SkillDetails[i].s_id,
 						"s_type": "Horizon3",
 						"matrix_score" : 0,
-						"longivity_score" : 0,
+						"recency_score" : 0,
 						"experience_score" : 0,
 						"skill_score" : this.approvalHorizon3SkillDetails[i].skill_score,
 						"evaluated" : this.approvalHorizon3SkillDetails[i].evaluated,
@@ -554,53 +608,54 @@ export class SkilltrackerComponent implements OnInit {
 	}
 
 	/*** Report section: tab3 ***/
-	prepareReportTab(){
+	preparePrimaryReportTab(){
+		this.reportOption = 'Primary';
 		this.reportQtr = this.currentQtr;
+		this.reportDesignation = 0;
+		this.reportSkill = 0;
+		this.reportDeployment = "0";
+		this.reportEmployeeId = 0;
+		this.reportEvaluated = -1;
+		//this.reportMatrixScore = 0;
+		//this.reportRecencyScore = 0;
+		//this.reportExperienceScore = 0;
+		this.reportSkillScore =0;
 		this.getDesignation();
-		this.getSkills();
+		this.getSkills('Primary');
 		this.getReportEmployeeList();
-		this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
-		this.getReport();
+		this.getReport('Primary');
 	}
 
-	//If Main Report Filter is Changed
-	changedReport(){
-		this.filterOption = this.reportOption;
-		this.getSkills();
-		if(this.reportOption == 'Primary'){
-			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
-			this.reportDesignation = 0;
-			this.reportSkill = 0;
-			this.reportDeployment = "0";
-			this.reportEmployeeId = 0;
-			this.reportEvaluated = -1;
-			this.reportMatrixScore = 0;
-			this.reportLongivityScore = 0;
-			this.reportExperienceScore = 0;
-			this.reportSkillScore =0;
-		}
-		else if(this.reportOption == 'Upskill'){
-			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Matrix Score','Longivity Score','Experience Score','Skill Score','Manager/Consultant Evaluated'];
-			this.reportDesignation = 0;
-			this.reportSkill = 0;
-			this.reportDeployment = "0";
-			this.reportEmployeeId = 0;
-			this.reportEvaluated = -1;
-			this.reportProject = 0;
-			this.reportPeopleManager = 0;
-			this.reportMatrixScore = 0;
-			this.reportLongivityScore = 0;
-			this.reportExperienceScore = 0;
-			this.reportSkillScore =0;
-		}
-		else if(this.reportOption == 'Horizon3'){
-			this.reportColumns = ['Sl No.','Employee Name','Employee Id','Delivery Manager','Designation','Evaluation Quarter','Skill','Rating'];
-			this.reportDesignation = 0;
-			this.reportSkill = 0;
-			this.reportDeployment = "0";
-		}
+	/*** UPSKILL REPORTS ***/
+	prepareUpskillReportTab(){
+		this.reportOption = 'Upskill';
+		this.reportSkill = 0;
+		this.reportDesignation = 0;
+		this.reportDeployment = "0";
+		this.reportEmployeeId = 0;
+		this.reportEvaluated = -1;
+		this.reportProject = 0;
+		this.reportPeopleManager = 0;
+		//this.reportMatrixScore = 0;
+		//this.reportRecencyScore = 0;
+		//this.reportExperienceScore = 0;
+		this.reportSkillScore =0;
+		this.getDesignation();
+		this.getSkills('Upskill');
+		this.getReportEmployeeList();
+		this.getReport('Upskill');
+	}
 
-		this.getReport();
+	/*** HORIZON 3 REPORTS ***/
+	prepareHorizon3ReportTab(){
+		this.reportOption = 'Horizon3';
+		this.reportQtr = this.currentQtr;
+		this.reportDesignation = 0;
+		this.reportSkill = 0;
+		this.reportDeployment = "0";
+		this.getDesignation();
+		this.getSkills('Horizon3');
+		this.getReport('Horizon3');
 	}
 
 	//If Designation Filter is Changed
@@ -610,6 +665,23 @@ export class SkilltrackerComponent implements OnInit {
 
 	//If Skill Filter is Changed
 	changedSkill(){
+		if(this.reportOption == 'Upskill'){
+			if(this.reportSkill == 0 || this.reportEmployeeId == 0){
+			this.reportButtonDisable = true; 
+		}
+		else{
+			this.reportButtonDisable = false;
+		}
+		}
+		else{
+			if(this.reportSkill == 0){
+				this.reportButtonDisable = true; 
+			}
+			else{
+				this.reportButtonDisable = false;
+			}
+		}
+		
 		this.getReportEmployeeList();
 	}
 
@@ -618,9 +690,14 @@ export class SkilltrackerComponent implements OnInit {
 		this.getReportEmployeeList();
 	}
 
-	updateReportSkillScore(){
-		var sumnum = (+this.reportMatrixScore*0.5) + (+this.reportLongivityScore*0.2) + (+this.reportExperienceScore*0.3);
-		this.reportSkillScore = sumnum;
+	//If Employee ID is Changed
+	changedEmployee(){
+		if(this.reportEmployeeId == 0){
+			this.reportButtonDisable = true; 
+		}
+		else{
+			this.reportButtonDisable = false;
+		}
 	}
 
 	//For Optgroup Designation for Report Filter
@@ -630,7 +707,6 @@ export class SkilltrackerComponent implements OnInit {
 		var designation:Array<any> = [];
 		this.STService.getDesignation().subscribe((data : any[])=>{
 			if(data.length > 0){
-				this.role = 1;
 				for(let i=0;i<data.length;i++){
 					if(deptname != data[i].Department_Name ){
 						if(deptname != ''){
@@ -662,9 +738,9 @@ export class SkilltrackerComponent implements OnInit {
 	}
 
 	//For Listing Skills for Report Filter
-	getSkills(){
+	getSkills(stype){
 		this.skillList = [];
-		let type = {"s_type":this.reportOption};
+		let type = {"s_type":stype};
 		let param = JSON.stringify(type);
 		this.STService.getSkillsList(param).subscribe((data : any[])=>{
 			if(data.length > 0){
@@ -701,10 +777,10 @@ export class SkilltrackerComponent implements OnInit {
 	}
 
 	//For Generating Report
-	getReport(){
+	getReport(stype){
 		this.reportTable = [];
 		let data = {};
-		if(this.reportOption == 'Primary'){
+		if(stype == 'Primary'){
 			
 			data = {
 				'type': 'Primary',
@@ -714,17 +790,17 @@ export class SkilltrackerComponent implements OnInit {
 				'deployment': this.reportDeployment,
 				'eid': this.reportEmployeeId,
 				'evaluated': this.reportEvaluated,
-				'matrix': this.reportMatrixScore,
-				'longivity': this.reportLongivityScore,
-				'experience': this.reportExperienceScore,
+				//'matrix': this.reportMatrixScore,
+				//'recency': this.reportRecencyScore,
+				//'experience': this.reportExperienceScore,
 				'skillscore': this.reportSkillScore
 			}
 		}
-		else if(this.reportOption == 'Upskill'){
+		else if(stype == 'Upskill'){
 			
 			data = {
 				'type': 'Upskill',
-				'qtr': this.reportQtr,
+				'qtr': this.currentQtr,
 				'designation': this.reportDesignation,
 				'skill': this.reportSkill,
 				'deployment': this.reportDeployment,
@@ -732,13 +808,13 @@ export class SkilltrackerComponent implements OnInit {
 				'evaluated': this.reportEvaluated,
 				'project':this.reportProject,
 				'peoplemanager':this.reportPeopleManager,
-				'matrix': this.reportMatrixScore,
-				'longivity': this.reportLongivityScore,
-				'experience': this.reportExperienceScore,
+				//'matrix': this.reportMatrixScore,
+				//'recency': this.reportRecencyScore,
+				//'experience': this.reportExperienceScore,
 				'skillscore': this.reportSkillScore
 			}
 		}
-		else if(this.reportOption == 'Horizon3'){
+		else if(stype == 'Horizon3'){
 			data = {
 				'type': 'Horizon3',
 				'qtr': this.reportQtr,
@@ -748,7 +824,7 @@ export class SkilltrackerComponent implements OnInit {
 			}
 		}
 		let param = JSON.stringify(data);
-		this.getChart(param);
+		this.getChart(stype,param);
 		this.STService.getReport(param).subscribe((data : any[])=>{
 			if(data.length > 0){
 				for(let i=0;i<data.length;i++){
@@ -760,12 +836,12 @@ export class SkilltrackerComponent implements OnInit {
 		})
 	}
 
-	getChart(param){
+	getChart(stype,param){
 		this.STService.getChart(param).subscribe((data : any[])=>{
-			if(this.filterOption == 'Primary'){
+			if(stype == 'Primary'){
 				this.resourceTotalChart['data'] = [];
 				this.resourceMatrixChart['dataset'] = [];
-				this.resourceLongivityChart['dataset'] = [];
+				this.resourceRecencyChart['dataset'] = [];
 				this.resourceExperienceChart['dataset'] = [];
 				var desig = "";
 				if(data.length > 0){
@@ -791,18 +867,18 @@ export class SkilltrackerComponent implements OnInit {
 					}
 
 					desig = '';
-					//FOR Longivity Score Chart
+					//FOR Recency Score Chart
 					var chart3 = data[2];
 					for(let i=0;i<chart3.length;i++){
 						if(desig != chart3[i].Designation_Name){
 							desig = chart3[i].Designation_Name
-							this.resourceLongivityChart['dataset'].push({"seriesname":desig, "data":[{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"}]})
+							this.resourceRecencyChart['dataset'].push({"seriesname":desig, "data":[{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"},{"value":"0"}]})
 						}
 						
-						var datasetlength = this.resourceLongivityChart['dataset'].length
-						if(this.resourceLongivityChart['dataset'][datasetlength - 1].seriesname == chart3[i].Designation_Name){
-							var score = Math.ceil(chart3[i].longivity_score);
-							this.resourceLongivityChart['dataset'][datasetlength - 1].data[score].value = +this.resourceLongivityChart['dataset'][datasetlength - 1].data[score].value+chart3[i].emp;
+						var datasetlength = this.resourceRecencyChart['dataset'].length
+						if(this.resourceRecencyChart['dataset'][datasetlength - 1].seriesname == chart3[i].Designation_Name){
+							var score = Math.ceil(chart3[i].recency_score);
+							this.resourceRecencyChart['dataset'][datasetlength - 1].data[score].value = +this.resourceRecencyChart['dataset'][datasetlength - 1].data[score].value+chart3[i].emp;
 						}
 					}
 
@@ -823,7 +899,7 @@ export class SkilltrackerComponent implements OnInit {
 					}
 				}
 			} // End for Primary Chart
-			else if(this.filterOption == 'Upskill' && this.reportEmployeeId != 0){
+			else if(stype == 'Upskill' && this.reportEmployeeId != 0){
 				this.upskillIndividualChart['data'] = [];
 				this.upskillTrendChart['dataset'] = [];
 				this.upskillTrendChart['categories'][0].category = [];
@@ -896,7 +972,7 @@ export class SkilltrackerComponent implements OnInit {
 					}
 				}
 			} // End for Upskill Chart
-			else if(this.filterOption == 'Horizon3'){
+			else if(stype == 'Horizon3'){
 				var skill = "";
 				this.horizon3ScoreChart['categories'][0]['category'] = [];
 				this.horizon3ScoreChart['dataset'][0].data = [];
@@ -958,4 +1034,60 @@ export class SkilltrackerComponent implements OnInit {
 		})
 	}
 
+	/*** SETTING TAB ***/
+	prepareSettingTab(){
+		this.getScoreWeight();
+	}
+	
+	getScoreWeight(){
+		this.matrixScoreWeight = 0;
+		this.recencyScoreWeight = 0;
+		this.experienceScoreWeight = 0;
+		
+		this.STService.getScoreWeight().subscribe((data : any[])=>{
+			if(data.length > 0){
+				for(let i=0;i<data.length;i++){
+					if(data[i].item == "Matrix Score Weight"){
+						this.matrixScoreWeight = data[i].value;
+					}
+					else if(data[i].item == "Recency Score Weight"){
+						this.recencyScoreWeight = data[i].value;
+					}
+					else if(data[i].item == "Experience Score Weight"){
+						this.experienceScoreWeight = data[i].value;
+					}
+					this.lastUpdatedDate = data[i].updated_ts;
+					this.lastUpdatedBy = data[i].updated_by;
+				}
+			}
+		}, err => {
+			console.log(err);
+		})
+	}
+
+	//To Validate Scores Weightage. It should always be equal to 1
+	validateWeight(){
+		let matrixWeight = this.matrixScoreWeight;
+		let recencyWeight = this.recencyScoreWeight;
+		let experienceWeight = this.experienceScoreWeight;
+		if(+matrixWeight+recencyWeight+experienceWeight >= 0.99 && +matrixWeight+recencyWeight+experienceWeight < 1.01){
+			this.buttondisabled = false;
+		}
+		else{
+			this.buttondisabled = true;
+		}
+	}
+
+	updateScoreWeight(){
+		let data = {"e_id": this.employeeID,"matrixWeight":this.matrixScoreWeight,"recencyWeight":this.recencyScoreWeight,"experienceWeight":this.experienceScoreWeight};
+		let param = JSON.stringify(data);
+		this.STService.UpdateScoreWeight(param).subscribe((data : any[])=>{
+			let res:any = data;
+			if(res){  
+			  alert("success")
+			}else{
+			  alert("error")
+			}
+		})
+	}
 }
